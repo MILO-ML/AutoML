@@ -25,6 +25,9 @@ source milo-env/bin/activate
 
 # Always source this environment (optional)
 printf "\nsource /home/<username>/milo-env/bin/activate" >> .bashrc
+
+# Generate a secret for web sockets
+echo -e "\nSOCKET_SECRET_KEY=$(cat /dev/urandom | env LC_CTYPE=C tr -cd 'a-f0-9' | head -c 10)"
 ```
 
 ## Install

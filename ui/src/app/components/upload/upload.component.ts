@@ -38,13 +38,8 @@ export class UploadComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.priorJobs$ = timer(0, 5000).pipe(
-      switchMap(() => this.backend.getPriorJobs())
-    );
-
-    this.publishedModels$ = timer(0, 5000).pipe(
-      switchMap(() => this.backend.getPublishedModels())
-    );
+    this.priorJobs$ = this.backend.getPriorJobs();
+    this.publishedModels$ = this.backend.getPublishedModels();
   }
 
   onSubmit() {

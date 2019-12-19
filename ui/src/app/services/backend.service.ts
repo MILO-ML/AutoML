@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { v4 as uuid } from 'uuid';
+import io from 'socket.io-client';
 
 import { Results, TaskDetails, TaskStatus, PriorJobs, PublishedModels } from '../interfaces';
 
@@ -11,6 +12,7 @@ export class BackendService {
   currentJobId;
   userData;
   SERVER_URL = 'http://localhost:5000';
+  socket = io(this.SERVER_URL);
 
   constructor(
     private http: HttpClient,
@@ -30,6 +32,8 @@ export class BackendService {
 
     localStorage.setItem('userData', JSON.stringify(userData));
     this.userData = userData;
+    this.socket.emit('list-jobs', this.userData.id);
+    this.socket.on('list-jobs', d => console.log(d));
   }
 
   submitData(formData) {

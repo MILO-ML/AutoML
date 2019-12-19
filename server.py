@@ -10,16 +10,24 @@ import os
 import json
 from shutil import copyfile
 
+from dotenv import load_dotenv
 from flask import abort, Flask, jsonify, request, send_file, send_from_directory, url_for
 from flask_cors import CORS
+from flask_socketio import emit, SocketIO
 import pandas as pd
 
 from api import create_model, predict
-from worker import CELERY, get_task_status, queue_training, revoke_task, get_pending_tasks
+from backend.get_jobs import get_user_jobs
+from worker import get_task_status, queue_training, revoke_task, get_pending_tasks
+
+load_dotenv()
 
 PUBLISHED_MODELS = 'data/published-models.json'
 
 APP = Flask(__name__, static_url_path='')
+APP.config['SECRET_KEY'] = os.getenv('SOCKET_SECRET_KEY', '')
+SOCKET = SocketIO()
+SOCKET.init_app(APP, cors_allowed_origins='*')
 CORS(APP)
 
 @APP.route('/')
@@ -257,6 +265,10 @@ def list_pending(userid):
     tasks = get_pending_tasks()
 
     for task in tasks:
+        if tasks[task]['args'][0] != userid.urn[9:]:
+            del tasks[task]
+            continue
+
         tasks[task]['status'] = get_task_status(task)
 
     return jsonify(tasks)
@@ -271,37 +283,10 @@ def cancel_task(task_id):
 def list_jobs(userid):
     """Get all the jobs for a given user ID"""
 
-    folder = 'data/' + userid.urn[9:]
-
-    if not os.path.exists(folder):
+    jobs = get_user_jobs(userid.urn[9:])
+    if not jobs:
         abort(404)
         return
-
-    jobs = []
-    for job in os.listdir(folder):
-        if not os.path.isdir(folder + '/' + job) or\
-            not os.path.exists(folder + '/' + job + '/train.csv') or\
-            not os.path.exists(folder + '/' + job + '/test.csv') or\
-            not os.path.exists(folder + '/' + job + '/label.txt'):
-            continue
-
-        has_results = os.path.exists(folder + '/' + job + '/report.csv')
-        label = open(folder + '/' + job + '/label.txt', 'r')
-        label_column = label.read()
-        label.close()
-
-        if os.path.exists(folder + '/' + job + '/metadata.json'):
-            with open(folder + '/' + job + '/metadata.json') as json_file:
-                metadata = json.load(json_file)
-        else:
-            metadata = {}
-
-        jobs.append({
-            'id': job,
-            'label': label_column,
-            'results': has_results,
-            'metadata': metadata
-        })
 
     return jsonify(jobs)
 
@@ -400,8 +385,14 @@ def export_published_model(model):
     return send_file(published[model]['path'] + '.joblib', as_attachment=True)
 
 @APP.errorhandler(404)
-def page_not_found(e):
+def page_not_found():
+    """Redirect all invalid pages back to the root index"""
+
     return load_ui()
 
+@SOCKET.on('list-jobs')
+def list_jobs_socket_handler(userid):
+    emit('list-jobs', get_user_jobs(userid), room=request.sid)
+
 if __name__ == "__main__":
-    APP.run()
+    SOCKET.run(APP)
