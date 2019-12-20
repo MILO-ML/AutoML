@@ -75,8 +75,12 @@ def find_best_model(
     results = []
     total_fits = {}
 
-    all_pipelines = list(itertools.product(
-        *[ESTIMATOR_NAMES, FEATURE_SELECTOR_NAMES, SCALER_NAMES, SEARCHER_NAMES]))
+    all_pipelines = list(itertools.product(*[
+        filter(lambda x: False if x in ignore_estimator else True, ESTIMATOR_NAMES),
+        filter(lambda x: False if x in ignore_feature_selector else True, FEATURE_SELECTOR_NAMES),
+        filter(lambda x: False if x in ignore_scaler else True, SCALER_NAMES),
+        filter(lambda x: False if x in ignore_searcher else True, SEARCHER_NAMES),
+    ]))
 
     report = open(output_path + '/report.csv', 'w+')
     report_writer = csv.writer(report)
@@ -88,13 +92,7 @@ def find_best_model(
 
         # SVM without scaling can loop consuming infinite CPU time so
         # we prevent that combination here.
-        #
-        # If any of the steps are matched in the ignore, then continue.
-        if (estimator == 'svm' and scaler == 'none') or\
-            estimator in ignore_estimator or\
-            feature_selector in ignore_feature_selector or\
-            scaler in ignore_scaler or\
-            searcher in ignore_searcher:
+        if (estimator == 'svm' and scaler == 'none'):
             continue
 
         key = '__'.join([scaler, feature_selector, estimator, searcher])
