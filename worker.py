@@ -7,7 +7,7 @@ from celery import Celery
 from celery.signals import after_task_publish, task_prerun, task_postrun
 from celery.task.control import revoke
 
-from api import api
+from ml import api
 
 CELERY = Celery(__name__, backend='rpc://', broker='pyamqp://guest@localhost//')
 CELERY.conf.update(task_track_started=True)

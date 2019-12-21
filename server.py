@@ -16,7 +16,7 @@ from flask_cors import CORS
 from flask_socketio import emit, SocketIO
 import pandas as pd
 
-from api import create_model, predict
+from ml import create_model, predict
 from backend.get_jobs import get_user_jobs
 from worker import get_task_status, queue_training, revoke_task, get_pending_tasks
 

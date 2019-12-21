@@ -5,7 +5,7 @@ Interact with the trainer using the CLI
 """
 import sys
 
-from api import api
+from ml import api
 
 # Parse input or load sample data
 if len(sys.argv) < 4:
