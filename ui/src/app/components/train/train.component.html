@@ -1,4 +1,4 @@
-<div class='ion-padding ion-text-center container' [formGroup]='trainForm'>
+<div class='ion-padding ion-text-center' ngClass='{"container": !parameters}' [formGroup]='trainForm'>
   <ion-card class='pipeline-elements' [hidden]='training'>
     <ion-card-header>
       <ion-card-subtitle *ngIf='!parameters'>Select pipeline processors that you would like to enable</ion-card-subtitle>

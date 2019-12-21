@@ -12,8 +12,30 @@ from api import api
 CELERY = Celery(__name__, backend='rpc://', broker='pyamqp://guest@localhost//')
 CELERY.conf.update(task_track_started=True)
 
+def fix_celery_solo(userid, jobid):
+    """
+    Celery retries tasks due to ACK issues when running in solo mode,
+    We can manually check if the task has already completed and quickly finish the re-queue.
+    """
+
+    folder = 'data/' + userid + '/' + jobid
+    if os.path.exists(folder + '/metadata.json'):
+        with open(folder + '/metadata.json') as metafile:
+            try:
+                metadata = json.load(metafile)
+            except:
+                return False
+
+        if 'date' in metadata:
+            return True
+
+    return False
+
 @CELERY.task(bind=True)
 def queue_training(self, userid, jobid, label_column, parameters):
+    if fix_celery_solo(userid, jobid):
+        return 0
+
     folder = 'data/' + userid + '/' + jobid
     labels = ['No ' + label_column, label_column]
 
