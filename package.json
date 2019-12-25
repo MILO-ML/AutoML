@@ -6,7 +6,7 @@
   "scripts": {
     "build-ui": "cd ui && npm run build",
     "postinstall": "pip install -r requirements.txt && cd ui && npm install",
-    "serve": "concurrently 'watchmedo auto-restart -d . -R -p \"*.py\" -- python -u server.py' 'cd ui && npm run start' 'rm -rf /usr/local/var/lib/rabbitmq/mnesia/rabbit@localhost && rabbitmq-server' '> .tasks.json && watchmedo auto-restart -d . -R -p \"*.py\" -- celery -E -A worker --pool=solo worker' 'sleep 15s && open http://localhost:4200'",
+    "serve": "concurrently 'watchmedo auto-restart -d . -R -p \"*.py\" -- python -u server.py' 'cd ui && npm run start' 'rm -rf /usr/local/var/lib/rabbitmq/mnesia/rabbit@localhost && rabbitmq-server' 'watchmedo auto-restart -d . -R -p \"*.py\" -- celery -E -A worker -c 1 worker' 'sleep 15s && open http://localhost:4200'",
     "start": "npm run serve",
     "test": "pytest ml/unit_test.py",
     "update": "git pull && npm install"

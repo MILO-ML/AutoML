@@ -3,7 +3,7 @@
     <ion-title>MILO: Machine Intelligence Learning Optimizer</ion-title>
     <ion-buttons slot='end' class='ion-padding-end'>
       <ng-container *ngIf='pendingTasks$ | async as pendingTasks'>
-        <ion-button fill='solid' color='primary' (click)='openPendingTasks($event)' *ngIf='keys(pendingTasks).length'>
+        <ion-button fill='solid' color='primary' (click)='openPendingTasks($event, pendingTasks)' *ngIf='pendingTasks.active.length || pendingTasks.scheduled.length'>
           <ion-spinner name='dots' slot='icon-only'></ion-spinner>
         </ion-button>
       </ng-container>
@@ -22,7 +22,7 @@
 <div class='container'>
   <mat-horizontal-stepper #stepper linear>
     <mat-step label='Select Data' [stepControl]='uploadForm' [editable]='!uploadForm.valid' errorMessage='Data upload is required.'>
-      <app-upload #upload (stepFinished)='stepFinished($event)'></app-upload>
+      <app-upload #upload (stepFinished)='stepFinished($event)' [isActive]='stepper?.selectedIndex === 0'></app-upload>
     </mat-step>
     <mat-step label='Train' [stepControl]='trainForm' [editable]='!trainForm.valid' errorMessage='Pipeline elements need selection.'>
       <app-train #train (stepFinished)='stepFinished($event)' [featureCount]='featureCount' (reset)='reset()'></app-train>

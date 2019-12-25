@@ -1,20 +1,31 @@
-<ion-list *ngIf='pendingTasks$ | async; let pendingTasks'>
+<ion-list *ngIf='(pendingTasks$ | async) || firstViewData; let pendingTasks'>
   <ion-list-header>
     <ion-label>Tasks</ion-label>
   </ion-list-header>
-  <ion-item *ngFor='let task of pendingTasks | keyvalue'>
-    {{task.value.args[2]}}: {{task.value.time ? 'Running' : 'Waiting'}} 
+  <ion-item *ngFor='let task of pendingTasks.active'>
+    {{task.label}}: {{task.state === "REVOKED" ? 'Cancelling...' : (task.time ? 'Running' : 'Waiting')}}
     <div slot='end'>
-      <span *ngIf='task.value.time' class='status-text ion-padding-end'>{{((task.value.status.current / task.value.status.total) * 100) | number:'1.0-0'}}% Completed</span>
-      <ion-button color='medium' fill='solid' size='small' (click)='showDetails(task.value.args[3])'>
+      <span *ngIf='task.time && task.state !== "REVOKED"' class='status-text ion-padding-end'>
+        {{((task.current / task.total) * 100) | number:'1.0-0'}}% Completed
+      </span>
+      <ion-button color='medium' fill='solid' size='small' (click)='showDetails(task.parameters)'>
         <ion-icon size='small' slot='icon-only' name='settings'></ion-icon>
       </ion-button>
-      <ion-button color='danger' fill='solid' size='small' (click)='cancelTask(task.key)'>
+      <ion-button color='danger' fill='solid' size='small' (click)='cancelTask(task.id)'>
         <ion-icon slot='icon-only' name='close'></ion-icon>
       </ion-button>
     </div>
   </ion-item>
-  <ion-item *ngIf='!keys(pendingTasks).length'>
+  <ion-item *ngFor='let task of pendingTasks.scheduled'>
+    {{task.label}}: Pending 
+    <div slot='end'>
+      <span class='status-text ion-padding-end'>ETA: {{task.eta | date : 'medium'}}</span>
+      <ion-button color='danger' fill='solid' size='small' (click)='cancelTask(task.id)'>
+        <ion-icon slot='icon-only' name='close'></ion-icon>
+      </ion-button>
+    </div>
+  </ion-item>
+  <ion-item *ngIf='!pendingTasks.scheduled.length && !pendingTasks.active.length'>
     No active tasks
   </ion-item>
 </ion-list>

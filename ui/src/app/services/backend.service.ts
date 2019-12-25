@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { v4 as uuid } from 'uuid';
 import io from 'socket.io-client';
 
-import { Results, TaskDetails, TaskStatus, PriorJobs, PublishedModels } from '../interfaces';
+import { ActiveTaskStatus, Results, PendingTasks, PriorJobs, PublishedModels } from '../interfaces';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,7 @@ import { Results, TaskDetails, TaskStatus, PriorJobs, PublishedModels } from '..
 export class BackendService {
   currentJobId;
   userData;
-  SERVER_URL = 'http://localhost:5000';
-  socket = io(this.SERVER_URL);
+  socket = io(environment.apiUrl);
 
   constructor(
     private http: HttpClient,
@@ -38,79 +38,79 @@ export class BackendService {
 
   submitData(formData) {
     this.currentJobId = uuid();
-    return this.http.post<any>(this.SERVER_URL + '/upload/' + this.userData.id + '/' + this.currentJobId, formData);
+    return this.http.post<any>(environment.apiUrl + '/upload/' + this.userData.id + '/' + this.currentJobId, formData);
   }
 
   cloneJob(job) {
     this.currentJobId = uuid();
-    return this.http.post(this.SERVER_URL + '/clone/' + this.userData.id + '/' + job + '/' + this.currentJobId, undefined);
+    return this.http.post(environment.apiUrl + '/clone/' + this.userData.id + '/' + job + '/' + this.currentJobId, undefined);
   }
 
   startTraining(formData) {
-    return this.http.post(this.SERVER_URL + '/train/' + this.userData.id + '/' + this.currentJobId, formData);
+    return this.http.post(environment.apiUrl + '/train/' + this.userData.id + '/' + this.currentJobId, formData);
   }
 
   getTaskStatus(id: number) {
-    return this.http.get<TaskStatus>(this.SERVER_URL + '/status/' + id);
+    return this.http.get<ActiveTaskStatus>(environment.apiUrl + '/status/' + id);
   }
 
   cancelTask(id: number) {
-    return this.http.delete(this.SERVER_URL + '/cancel/' + id);
+    return this.http.delete(environment.apiUrl + '/cancel/' + id);
   }
 
   getResults() {
-    return this.http.get<Results>(this.SERVER_URL + '/results/' + this.userData.id + '/' + this.currentJobId);
+    return this.http.get<Results>(environment.apiUrl + '/results/' + this.userData.id + '/' + this.currentJobId);
   }
 
   getModelFeatures(model: string) {
-    return this.http.get<string>(this.SERVER_URL + '/features/' + model);
+    return this.http.get<string>(environment.apiUrl + '/features/' + model);
   }
 
   createModel(formData) {
-    return this.http.post(this.SERVER_URL + '/create/' + this.userData.id + '/' + this.currentJobId, formData);
+    return this.http.post(environment.apiUrl + '/create/' + this.userData.id + '/' + this.currentJobId, formData);
   }
 
   unpublishModel(id: string) {
-    return this.http.delete(this.SERVER_URL + '/unpublish/' + id);
+    return this.http.delete(environment.apiUrl + '/unpublish/' + id);
   }
 
   testPublishedModel(data, publishName) {
-    return this.http.post(this.SERVER_URL + '/test/' + publishName, data);
+    return this.http.post(environment.apiUrl + '/test/' + publishName, data);
   }
 
   testModel(data) {
-    return this.http.post(this.SERVER_URL + '/test/' + this.userData.id + '/' + this.currentJobId, data);
+    return this.http.post(environment.apiUrl + '/test/' + this.userData.id + '/' + this.currentJobId, data);
   }
 
   getPendingTasks() {
-    return this.http.get<TaskDetails>(this.SERVER_URL + '/list-pending/' + this.userData.id);
+    return this.http.get<PendingTasks>(environment.apiUrl + '/list-pending/' + this.userData.id);
   }
 
   getPriorJobs() {
-    return this.http.get<PriorJobs[]>(this.SERVER_URL + '/list-jobs/' + this.userData.id);
+    return this.http.get<PriorJobs[]>(environment.apiUrl + '/list-jobs/' + this.userData.id);
   }
 
   getPublishedModels() {
-    return this.http.get<PublishedModels>(this.SERVER_URL + '/list-published/' + this.userData.id);
+    return this.http.get<PublishedModels>(environment.apiUrl + '/list-published/' + this.userData.id);
   }
 
   exportCSV() {
-    return this.SERVER_URL + '/export/' + this.userData.id + '/' + this.currentJobId;
+    return environment.apiUrl + '/export/' + this.userData.id + '/' + this.currentJobId;
   }
 
   exportModel() {
-    return this.SERVER_URL + '/export-model/' + this.userData.id + '/' + this.currentJobId;
+    return environment.apiUrl + '/export-model/' + this.userData.id + '/' + this.currentJobId;
   }
 
   exportPMML() {
-    return this.SERVER_URL + '/export-pmml/' + this.userData.id + '/' + this.currentJobId;
+    return environment.apiUrl + '/export-pmml/' + this.userData.id + '/' + this.currentJobId;
   }
 
   exportPublishedModel(publishName) {
-    return this.SERVER_URL + '/export-model/' + publishName;
+    return environment.apiUrl + '/export-model/' + publishName;
   }
 
   exportPublishedPMML(publishName) {
-    return this.SERVER_URL + '/export-pmml/' + publishName;
+    return environment.apiUrl + '/export-pmml/' + publishName;
   }
 }

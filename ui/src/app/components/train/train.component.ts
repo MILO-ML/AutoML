@@ -1,7 +1,7 @@
 import { Component, Input, EventEmitter, Output, OnChanges, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AlertController, ModalController, ToastController } from '@ionic/angular';
-import { timer } from 'rxjs';
+import { timer, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
@@ -22,6 +22,7 @@ export class TrainComponent implements OnChanges, OnInit {
   @Output() reset = new EventEmitter();
   @Output() stepFinished = new EventEmitter();
 
+  statusPoller$: Subscription;
   allPipelines;
   showAdvanced = !environment.production;
   defaultHyperParameters = {grid: {}, random: {}};
@@ -180,6 +181,12 @@ export class TrainComponent implements OnChanges, OnInit {
     return Object.keys(current.grid[estimator] || {}).length || Object.keys(current.random[estimator] || {}).length;
   }
 
+  resetPoller() {
+    if (this.statusPoller$) {
+      this.statusPoller$.unsubscribe();
+    }
+  }
+
   private getValues(key) {
     return this.trainForm.get(key).value.flatMap((value, index) => {
       return value ? [] : this.pipelineProcessors[key][index].value;
@@ -224,16 +231,16 @@ export class TrainComponent implements OnChanges, OnInit {
   }
 
   private checkStatus(task) {
-    const status$ = timer(1000, 5000).pipe(
+    this.statusPoller$ = timer(1000, 5000).pipe(
       switchMap(() => this.backend.getTaskStatus(task.id))
     ).subscribe(
       async (status) => {
         if (status.state === 'SUCCESS') {
-          status$.unsubscribe();
+          this.resetPoller();
           this.training = false;
           this.stepFinished.emit({state: 'train'});
         } else if (status.state === 'FAILURE') {
-          status$.unsubscribe();
+          this.resetPoller();
 
           const alert = await this.alertController.create({
             cssClass: 'wide-alert',
@@ -245,7 +252,7 @@ export class TrainComponent implements OnChanges, OnInit {
           await alert.present();
           this.reset.emit();
         } else if (status.state === 'REVOKED') {
-          status$.unsubscribe();
+          this.resetPoller();
 
           this.reset.emit();
         }

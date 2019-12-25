@@ -1,10 +1,8 @@
 import os
-import ast
 import json
-import time
 
 from celery import Celery
-from celery.signals import after_task_publish, task_prerun, task_postrun
+from celery.signals import worker_process_init
 from celery.task.control import revoke
 
 from ml import api
@@ -71,14 +69,6 @@ def queue_training(self, userid, jobid, label_column, parameters):
 def revoke_task(task_id):
     revoke(task_id, terminate=True)
 
-def get_pending_tasks():
-    with open('.tasks.json') as tasks_file:
-        try:
-            tasks = json.load(tasks_file)
-        except:
-            tasks = {}
-    return tasks
-
 def get_task_status(task_id):
     """Gets a given's task and returns a summary in JSON format"""
 
@@ -112,56 +102,7 @@ def get_task_status(task_id):
 
     return response
 
-@after_task_publish.connect
-def after_task_publish_handler(sender=None, headers=None, body=None, **kwargs):
-    info = headers if 'task' in headers else body
-
-    with open('.tasks.json', 'a+') as tasks_file:
-        tasks_file.seek(0)
-
-        try:
-            tasks = json.load(tasks_file)
-        except:
-            tasks = {}
-
-        tasks[info['id']] = {
-            'args': ast.literal_eval(info['argsrepr']),
-            'status': {'state': 'PENDING'}
-        }
-        tasks_file.seek(0)
-        tasks_file.truncate()
-        json.dump(tasks, tasks_file)
-
-@task_prerun.connect
-def task_prerun_handler(sender=None, task_id=None, task=None, args=None, kwargs=None, **kwds):
-    with open('.tasks.json', 'a+') as tasks_file:
-        tasks_file.seek(0)
-
-        try:
-            tasks = json.load(tasks_file)
-        except:
-            tasks = {}
-
-        tasks[task_id] = {
-            'args': args,
-            'time': time.time(),
-            'status': {'state': 'PENDING'}
-        }
-        tasks_file.seek(0)
-        tasks_file.truncate()
-        json.dump(tasks, tasks_file)
-
-@task_postrun.connect
-def task_postrun_handler(sender=None, task_id=None, task=None, args=None, kwargs=None, **kwds):
-    with open('.tasks.json', 'a+') as tasks_file:
-        tasks_file.seek(0)
-
-        try:
-            tasks = json.load(tasks_file)
-        except:
-            tasks = {}
-
-        del tasks[task_id]
-        tasks_file.seek(0)
-        tasks_file.truncate()
-        json.dump(tasks, tasks_file)
+@worker_process_init.connect
+def fix_multiprocessing(**kwargs):
+    from multiprocessing import current_process
+    current_process().daemon = False

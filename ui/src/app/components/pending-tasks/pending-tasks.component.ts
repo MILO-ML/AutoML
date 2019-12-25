@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { AlertController, ModalController, LoadingController } from '@ionic/angular';
 import { Observable, timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { BackendService } from '../../services/backend.service';
-import { TaskDetails } from '../../interfaces';
+import { PendingTasks } from '../../interfaces';
 import { TrainComponent } from '../train/train.component';
 
 @Component({
@@ -13,8 +13,8 @@ import { TrainComponent } from '../train/train.component';
   styleUrls: ['./pending-tasks.component.scss'],
 })
 export class PendingTasksComponent implements OnInit {
-  pendingTasks$: Observable<TaskDetails>;
-  keys = Object.keys;
+  @Input() firstViewData: PendingTasks;
+  pendingTasks$: Observable<PendingTasks>;
 
   constructor(
     private alertController: AlertController,

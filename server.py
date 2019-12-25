@@ -18,7 +18,7 @@ import pandas as pd
 
 from ml import create_model, predict
 from api.get_jobs import get_user_jobs
-from worker import get_task_status, queue_training, revoke_task, get_pending_tasks
+from worker import CELERY, get_task_status, queue_training, revoke_task
 
 load_dotenv()
 
@@ -85,14 +85,14 @@ def unpublish_model(model):
     """Unpublish a published model"""
 
     if not os.path.exists(PUBLISHED_MODELS):
-        abort(404)
+        abort(400)
         return
 
     with open(PUBLISHED_MODELS) as published_file:
         published = json.load(published_file)
 
     if model not in published:
-        abort(404)
+        abort(400)
         return
 
     published.pop(model, None)
@@ -107,14 +107,14 @@ def get_model_features(model):
     """Returns the features for a published model"""
 
     if not os.path.exists(PUBLISHED_MODELS):
-        abort(404)
+        abort(400)
         return
 
     with open(PUBLISHED_MODELS) as published_file:
         published = json.load(published_file)
 
     if model not in published:
-        abort(404)
+        abort(400)
         return
 
     return jsonify(published[model]['features'])
@@ -124,14 +124,14 @@ def test_published_model(model):
     """Tests the published model against the provided data"""
 
     if not os.path.exists(PUBLISHED_MODELS):
-        abort(404)
+        abort(400)
         return
 
     with open(PUBLISHED_MODELS) as published_file:
         published = json.load(published_file)
 
     if model not in published:
-        abort(404)
+        abort(400)
         return
 
     folder = published[model]['path'][:published[model]['path'].rfind('/')]
@@ -196,15 +196,20 @@ def get_results(userid, jobid):
     metadata = None
 
     if not os.path.exists(folder + '/report.csv'):
-        abort(404)
+        abort(400)
         return
+
+    try:
+        results = json.loads(pd.read_csv(folder + '/report.csv').to_json(orient='records'))
+    except:
+        abort(400)
 
     if os.path.exists(folder + '/metadata.json'):
         with open(folder + '/metadata.json') as metafile:
             metadata = json.load(metafile)
 
     return jsonify({
-        'results': json.loads(pd.read_csv(folder + '/report.csv').to_json(orient='records')),
+        'results': results,
         'metadata': metadata
     })
 
@@ -246,7 +251,7 @@ def clone_job(userid, jobid, newjobid):
         not os.path.exists(src_folder + '/train.csv') or\
         not os.path.exists(src_folder + '/test.csv') or\
         not os.path.exists(src_folder + '/label.txt'):
-        abort(404)
+        abort(400)
         return
 
     if not os.path.exists(dest_folder):
@@ -262,16 +267,51 @@ def clone_job(userid, jobid, newjobid):
 def list_pending(userid):
     """Get all pending tasks for a given user ID"""
 
-    tasks = get_pending_tasks()
+    active = []
+    scheduled = []
+    i = CELERY.control.inspect()
+    scheduled_tasks = i.scheduled()
+    scheduled_tasks = list(scheduled_tasks.values()) if scheduled_tasks else []
+    for worker in scheduled_tasks:
+        for task in worker:
+            if str(userid) in task['request']['args']:
+                try:
+                    args = ast.literal_eval(task['request']['args'])
+                except:
+                    continue
+                scheduled.append({
+                    'id': task['request']['id'],
+                    'eta': task['eta'],
+                    'jobid': args[1],
+                    'label': args[2],
+                    'parameters': args[3],
+                    'state': 'PENDING'
+                })
 
-    for task in tasks:
-        if tasks[task]['args'][0] != userid.urn[9:]:
-            del tasks[task]
-            continue
-
-        tasks[task]['status'] = get_task_status(task)
-
-    return jsonify(tasks)
+    active_tasks = i.active()
+    active_tasks = list(active_tasks.values()) if active_tasks else []
+    reserved_tasks = i.reserved()
+    reserved_tasks = list(reserved_tasks.values()) if reserved_tasks else []
+    for worker in active_tasks + reserved_tasks:
+        for task in worker:
+            if '.queue_training' in task['type'] and str(userid) in task['args']:
+                try:
+                    args = ast.literal_eval(task['args'])
+                except:
+                    continue
+                status = get_task_status(task['id'])
+                status.update({
+                    'id': task['id'],
+                    'jobid': args[1],
+                    'label': args[2],
+                    'parameters': args[3],
+                    'time': task['time_start']
+                })
+                active.append(status)
+    return jsonify({
+        'active': active,
+        'scheduled': scheduled
+    })
 
 @APP.route('/cancel/<uuid:task_id>', methods=['DELETE'])
 def cancel_task(task_id):
@@ -285,7 +325,7 @@ def list_jobs(userid):
 
     jobs = get_user_jobs(userid.urn[9:])
     if not jobs:
-        abort(404)
+        abort(400)
         return
 
     return jsonify(jobs)
@@ -295,7 +335,7 @@ def list_published(userid):
     """Get all published models for a given user ID"""
 
     if not os.path.exists(PUBLISHED_MODELS):
-        abort(404)
+        abort(400)
         return
 
     with open(PUBLISHED_MODELS) as published_file:
@@ -313,7 +353,7 @@ def export_results(userid, jobid):
     folder = 'data/' + userid.urn[9:] + '/' + jobid.urn[9:]
 
     if not os.path.exists(folder + '/report.csv'):
-        abort(404)
+        abort(400)
         return
 
     return send_file(folder + '/report.csv', as_attachment=True)
@@ -325,7 +365,7 @@ def export_pmml(userid, jobid):
     folder = 'data/' + userid.urn[9:] + '/' + jobid.urn[9:]
 
     if not os.path.exists(folder + '/pipeline.pmml'):
-        abort(404)
+        abort(400)
         return
 
     return send_file(folder + '/pipeline.pmml', as_attachment=True)
@@ -335,18 +375,18 @@ def export_published_pmml(model):
     """Export the published model's PMML"""
 
     if not os.path.exists(PUBLISHED_MODELS):
-        abort(404)
+        abort(400)
         return
 
     with open(PUBLISHED_MODELS) as published_file:
         published = json.load(published_file)
 
     if model not in published:
-        abort(404)
+        abort(400)
         return
 
     if not os.path.exists(published[model]['path'] + '.pmml'):
-        abort(404)
+        abort(400)
         return
 
     return send_file(published[model]['path'] + '.pmml', as_attachment=True)
@@ -358,7 +398,7 @@ def export_model(userid, jobid):
     folder = 'data/' + userid.urn[9:] + '/' + jobid.urn[9:]
 
     if not os.path.exists(folder + '/pipeline.joblib'):
-        abort(404)
+        abort(400)
         return
 
     return send_file(folder + '/pipeline.joblib', as_attachment=True)
@@ -368,24 +408,24 @@ def export_published_model(model):
     """Export the published model"""
 
     if not os.path.exists(PUBLISHED_MODELS):
-        abort(404)
+        abort(400)
         return
 
     with open(PUBLISHED_MODELS) as published_file:
         published = json.load(published_file)
 
     if model not in published:
-        abort(404)
+        abort(400)
         return
 
     if not os.path.exists(published[model]['path'] + '.joblib'):
-        abort(404)
+        abort(400)
         return
 
     return send_file(published[model]['path'] + '.joblib', as_attachment=True)
 
 @APP.errorhandler(404)
-def page_not_found():
+def page_not_found(e):
     """Redirect all invalid pages back to the root index"""
 
     return load_ui()

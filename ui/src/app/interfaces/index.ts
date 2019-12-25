@@ -75,23 +75,28 @@ export interface TaskAdded {
     href: string;
 }
 
-export interface TaskDetails {
-    [key: string]: {
-        time?: number;
-        args: [
-            string, string, string, SearchParameters
-        ];
-        status: TaskStatus;
-    };
-}
-
-export interface TaskStatus {
+export interface ActiveTaskStatus {
     current: number;
     total: number;
     status: string;
+    time: number;
+    id: string;
     state: 'PENDING' | 'RECEIVED' | 'STARTED' | 'REVOKED' | 'RETRY' | 'FAILURE' | 'SUCCESS';
+    jobid: string;
+    label: string;
+    parameters: SearchParameters;
 }
-
+export interface ScheduledTaskStatus {
+    eta: string;
+    state: 'PENDING';
+    jobid: string;
+    label: string;
+    parameters: SearchParameters;
+}
+export interface PendingTasks {
+    active: ActiveTaskStatus[];
+    scheduled: ScheduledTaskStatus[];
+}
 export interface PublishedModels {
     [key: string]: string[];
 }

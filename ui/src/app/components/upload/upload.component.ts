@@ -1,9 +1,9 @@
-import { Component, ElementRef, EventEmitter, Output, OnInit } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { parse } from 'papaparse';
 import { Observable, timer } from 'rxjs';
-import { switchMap, finalize } from 'rxjs/operators';
+import { switchMap, filter, finalize } from 'rxjs/operators';
 
 import { BackendService } from '../../services/backend.service';
 import { PriorJobs, PublishedModels } from '../../interfaces';
@@ -14,6 +14,7 @@ import { PriorJobs, PublishedModels } from '../../interfaces';
   styleUrls: ['upload.component.scss'],
 })
 export class UploadComponent implements OnInit {
+  @Input() isActive: boolean;
   @Output() stepFinished = new EventEmitter();
 
   priorJobs$: Observable<PriorJobs[]>;
@@ -38,8 +39,15 @@ export class UploadComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.priorJobs$ = this.backend.getPriorJobs();
-    this.publishedModels$ = this.backend.getPublishedModels();
+    this.priorJobs$ = timer(0, 5000).pipe(
+      filter(() => this.isActive),
+      switchMap(() => this.backend.getPriorJobs())
+    );
+
+    this.publishedModels$ = timer(0, 5000).pipe(
+      filter(() => this.isActive),
+      switchMap(() => this.backend.getPublishedModels())
+    );
   }
 
   onSubmit() {
