@@ -10,6 +10,10 @@ from shutil import rmtree
 from flask import abort, g, jsonify, request
 
 from ml.describe import describe as Describe
+from common.storage import storage_factory
+
+storage = storage_factory()
+print(storage.get_container('data'))
 
 def get():
     """Get all the datasets for a given user ID"""
