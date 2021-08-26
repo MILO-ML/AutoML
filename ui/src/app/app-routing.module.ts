@@ -7,6 +7,7 @@ import { environment } from '../environments/environment';
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['login', {redirectTo: location.pathname}]);
 
 const routes: Routes = [
+  { path: 'home', loadChildren: () => import('./pages/home/home.module').then( m => m.HomePageModule) },
   { path: 'login', loadChildren: () => import('./pages/login/login.module').then(m => m.LoginPageModule) },
   {
     path: 'search',
@@ -42,7 +43,7 @@ const routes: Routes = [
     path: 'update-license',
     loadChildren: () => import('./pages/update-license/update-license.module').then( m => m.UpdateLicensePageModule)
   },
-  { path: '**', redirectTo: 'search' }
+  { path: '**', redirectTo: 'home' }
 ];
 
 @NgModule({

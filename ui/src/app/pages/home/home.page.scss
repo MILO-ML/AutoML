@@ -1,0 +1,17 @@
+ion-grid {
+  width: 500px;
+
+  ion-row {
+    height: 100%;
+
+    ion-col {
+      cursor: pointer;
+    
+      ion-icon, img {
+        height: 80px;
+        width: 80px;
+        margin-bottom: 8px;
+      }
+    }
+  }
+}

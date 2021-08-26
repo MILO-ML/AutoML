@@ -1,0 +1,17 @@
+<ion-toolbar class='ion-text-center'>
+  <ion-title class='ion-hide-sm-up'>MILO-ML</ion-title>
+  <ion-title class='ion-hide-sm-down'>MILO-ML: Machine Intelligence Learning Optimizer <span class='version'>v{{version}}</span></ion-title>
+</ion-toolbar>
+
+<ion-grid>
+  <ion-row class='ion-align-items-center'>
+    <ion-col [routerLink]='["/tools"]' class='ion-text-center'>
+      <ion-icon color='light' name='hammer'></ion-icon>
+      <ion-title color='light'>Data Utilities</ion-title>
+    </ion-col>
+    <ion-col [routerLink]='["/search"]' class='ion-text-center'>
+      <img alt='AutoML' width='80' src='assets/icon/favicon.png' />
+      <ion-title color='light'>AutoML</ion-title>
+    </ion-col>
+  </ion-row>
+</ion-grid>
