@@ -11,6 +11,10 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { LoadingController, ToastController } from '@ionic/angular';
 import md5 from 'md5';
 
+import { environment } from '../../../environments/environment';
+import packageJson from '../../../../../package.json';
+import { MiloApiService } from 'src/app/services';
+
 enum Modes {
   SignIn,
   SignUp,
@@ -41,8 +45,10 @@ export class LoginPageComponent {
       lastName: new FormControl('', { validators: [Validators.required] })
     }
   );
+  version = packageJson.version;
 
   constructor(
+    public api: MiloApiService,
     private route: ActivatedRoute,
     private afAuth: Auth,
     private loadingController: LoadingController,
@@ -51,6 +57,10 @@ export class LoginPageComponent {
     private http: HttpClient,
     private location: Location
   ) { }
+
+  get isDocker() {
+    return environment.name === 'docker';
+  }
 
   ionViewWillEnter() {
     const email = localStorage.getItem('emailForSignIn');
@@ -245,7 +255,7 @@ export class LoginPageComponent {
     try {
       await confirmPasswordReset(this.afAuth, this.route.snapshot.queryParams.oobCode, this.authForm.value.password);
       await this.showError(`Password reset was successful`);
-      this.mode = Modes.SignIn;
+      this.exit(true);
     } catch (err) {
       await this.showError(`Unable to reset your password. Please ensure the reset password link is valid and try again.`);
     } finally {

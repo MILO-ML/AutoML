@@ -1,6 +1,17 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Login</ion-title>
+    <ion-title class='ion-hide-sm-up'>MILO-ML</ion-title>
+    <ion-title class='ion-hide-sm-down'>
+      MILO-ML: Machine Intelligence Learning Optimizer
+      <span class='version'>
+        v{{version}}{{api.isTrial ? (api.isEducation ? '-education' : '-trial') : ''}}
+      </span>
+    </ion-title>
+    <ion-buttons slot='end'>
+      <ion-button href='/docs/index.html' target='_blank' *ngIf='isDocker'>
+        <ion-icon slot='icon-only' name='help' color='primary'></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -9,7 +20,6 @@
     <ion-row class='ion-align-items-center full-height'>
       <ion-col class='ion-text-center'>
         <img src='assets/icon/favicon.png' width='70' />
-        <h1>Welcome to MILO-ML!</h1>
 
         <ng-container [ngSwitch]='mode'>
           <ng-container *ngSwitchCase='modes.SignIn'><ng-container *ngTemplateOutlet='signInTemplate'></ng-container></ng-container>
