@@ -1,0 +1,125 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  background-color: var(--ion-background-color);
+
+  ion-grid {
+      max-width: 384px;
+      background-color: var(--ion-background-color);
+      margin: 0 auto;
+
+      h1 {
+          font-size: 16px;
+          font-weight: 300;
+          color: var(--ion-text-color);
+
+          &.larger {
+              font-size: 24px;
+          }
+      }
+
+      a, p {
+          font-size: 14px;
+          font-weight: 300;
+          color: var(--ion-color-dark);
+      }
+
+      a {
+          cursor: pointer;
+          text-decoration: underline;
+
+          &.forgot-password {
+              display: block;
+          }
+      }
+
+      p {
+          padding-top: 16px;
+      }
+
+      .providers {
+          img {
+              display: inline-block;
+              width: 72px;
+              margin: 0 20px;
+              cursor: pointer;
+          }
+      }
+
+      .detail {
+          color: var(--ion-color-dark);
+      }
+
+      ion-button {
+          margin-top: 8px;
+      }
+  }
+}
+
+@media (max-height: 835px) {
+  :host {
+      display: block;
+      overflow-y: auto;
+
+      section {
+          margin: auto;
+      }
+  }
+}
+
+@media (max-height: 680px) {
+  :host {
+      ion-grid{
+          padding: 10px 44px;
+
+          img {
+              margin-bottom: 0;
+
+              &.mobile {
+                  display: block;
+              }
+
+              &.desktop {
+                  display: none;
+              }
+          }
+      }
+  }
+}
+
+@media (max-height: 560px) {
+  :host {
+      background-color: var(--ion-background-color);
+
+      ion-grid {
+          padding: calc(16px + env(safe-area-inset-top)) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+          width: calc(100% - 20px - env(safe-area-inset-right) - env(safe-area-inset-left));
+
+          h1 {
+              margin-top: 8px;
+          }
+
+          p {
+              margin: 0;
+          }
+      }
+  }
+}
+
+@media (max-width: 576px) {
+  .footer {
+      ion-col {
+          text-align: center !important;
+          padding: 5px 0;
+      }
+  }
+}
+
+@media (min-width: 576px) and (max-width: 1200px) {
+  .footer {
+      padding: 0 15px;
+  }
+}

@@ -151,6 +151,6 @@ export class SearchPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async signOut() {
     await signOut(this.afAuth);
-    this.router.navigateByUrl('/login');
+    this.router.navigateByUrl('/sign-in');
   }
 }

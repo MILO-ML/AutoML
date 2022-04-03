@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
 import { applyActionCode, Auth, AuthProvider, confirmPasswordReset, getAdditionalUserInfo, OAuthProvider, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, signInWithRedirect, signOut, updatePassword, updateProfile, UserCredential } from '@angular/fire/auth';
+import { sendSignInLinkToEmail } from '@angular/fire/node_modules/@firebase/auth';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
@@ -13,8 +14,7 @@ enum Modes {
   ResetPassword,
   ForgotPassword,
   ConfirmEmail,
-  WaitingForVerification,
-  Redirecting
+  WaitingForVerification
 }
 
 @Component({
@@ -109,6 +109,7 @@ export class LoginPageComponent {
     try {
       await sendPasswordResetEmail(this.afAuth, this.authForm.value.email);
       await this.showError(`Password reset has been sent. Please check your email for instructions.`);
+      this.mode = Modes.WaitingForVerification;
     } catch (err) {
       await this.showError(`Account not found, please verify an account with that email exists and try again.`);
     } finally {
@@ -180,7 +181,10 @@ export class LoginPageComponent {
     await loading.present();
 
     try {
-      await signInWithEmailLink(this.afAuth, this.authForm.value.email, this.getRedirectUrl());
+      await sendSignInLinkToEmail(this.afAuth, this.authForm.value.email, {
+        url: location.origin + this.getRedirectUrl(),
+        handleCodeInApp: true
+      });
       await loading.dismiss();
     } catch (err) {
       await loading.dismiss();
@@ -189,7 +193,7 @@ export class LoginPageComponent {
     }
 
     localStorage.setItem('emailForSignIn', this.authForm.value.email);
-    this.router.navigate(['/check-email']);
+    this.mode = Modes.WaitingForVerification;
   }
 
   async cancelSignUp() {
@@ -211,20 +215,13 @@ export class LoginPageComponent {
   }
 
   async exit(success = true) {
-    this.mode = Modes.Redirecting;
-    const user = await this.afAuth.currentUser;
-
     if (success) {
+      let url;
       if (this.route.snapshot.queryParams.continueUrl) {
-        const source = this.route.snapshot.queryParams.continueUrl.match(/source=(\w+)/)
-
-        if (source && source === 'extension') {
-          this.showExtensionNotice();
-          return;
-        }
+        url = new URL(this.route.snapshot.queryParams.continueUrl);
       }
 
-      this.router.navigateByUrl(this.getRedirectUrl());  
+      this.router.navigateByUrl(url ? url.pathname : this.getRedirectUrl());  
     } else {
       this.router.navigate(['/']);
     }
