@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 
 import { environment } from '../../../environments/environment';
-import { version } from '../../../../../package.json';
+import packageJson from '../../../../../package.json';
 import { MiloApiService } from '../../services';
 import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
@@ -15,7 +15,7 @@ import { ReplaySubject } from 'rxjs';
   styleUrls: ['./home.page.scss'],
 })
 export class HomePageComponent implements OnInit, OnDestroy {
-  version = version;
+  version = packageJson.version;
   license = new FormControl('', [Validators.required]);
   destroy$ = new ReplaySubject<boolean>();
 

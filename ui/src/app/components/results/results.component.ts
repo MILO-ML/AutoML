@@ -9,7 +9,7 @@ import { saveAs } from 'file-saver';
 import * as JSZip from 'jszip';
 import * as saveSvgAsPng from 'save-svg-as-png';
 
-import * as pipelineOptions from '../../data/pipeline.processors.json';
+import pipelineOptions from '../../data/pipeline.processors.json';
 import { MiloApiService } from '../../services/milo-api/milo-api.service';
 import { GeneralizationResult, MetaData, RefitGeneralization, Results } from '../../interfaces';
 import { MultiSelectMenuComponent } from '../multi-select-menu/multi-select-menu.component';

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 
 import { environment } from '../../../environments/environment';
-import { version } from '../../../../../package.json';
+import packageJson from '../../../../../package.json';
 import { MiloApiService } from '../../services';
 
 @Component({
@@ -13,7 +13,7 @@ import { MiloApiService } from '../../services';
   styleUrls: ['./update-license.page.scss'],
 })
 export class UpdateLicensePageComponent {
-  version = version;
+  version = packageJson.version;
   license = new FormControl('', [Validators.required]);
 
   constructor(
