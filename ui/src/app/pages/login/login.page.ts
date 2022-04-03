@@ -1,10 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
-import { applyActionCode, Auth, AuthProvider, confirmPasswordReset, getAdditionalUserInfo, OAuthProvider, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, signInWithRedirect, signOut, updatePassword, updateProfile, UserCredential } from '@angular/fire/auth';
+import {
+  applyActionCode, Auth, AuthProvider, confirmPasswordReset, getAdditionalUserInfo, OAuthProvider, sendPasswordResetEmail, signInWithEmailAndPassword,
+  signInWithEmailLink, signInWithPopup, signInWithRedirect, signOut, updatePassword, updateProfile, UserCredential
+} from '@angular/fire/auth';
 import { sendSignInLinkToEmail } from '@angular/fire/node_modules/@firebase/auth';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { LoadingController, ToastController } from '@ionic/angular';
 import md5 from 'md5';
 
 enum Modes {
@@ -42,7 +45,6 @@ export class LoginPageComponent {
     private route: ActivatedRoute,
     private afAuth: Auth,
     private loadingController: LoadingController,
-    private alertController: AlertController,
     private toastController: ToastController,
     private router: Router,
     private http: HttpClient
@@ -212,11 +214,6 @@ export class LoginPageComponent {
     this.loginWithPopup(provider);
   }
 
-  loginWithApple() {
-    const provider = new OAuthProvider('apple.com');
-    this.loginWithPopup(provider);
-  }
-
   async exit(success = true) {
     if (success) {
       let url;
@@ -224,7 +221,7 @@ export class LoginPageComponent {
         url = new URL(this.route.snapshot.queryParams.continueUrl);
       }
 
-      this.router.navigateByUrl(url ? url.pathname : this.getRedirectUrl());  
+      this.router.navigateByUrl(url ? url.pathname : this.getRedirectUrl());
     } else {
       this.router.navigate(['/']);
     }
@@ -337,14 +334,6 @@ export class LoginPageComponent {
 
   private getRedirectUrl() {
     return this.route.snapshot.params.redirectTo || '/search';
-  }
-
-  private async showExtensionNotice() {
-    await (await this.alertController.create({
-      buttons: ['Dismiss'],
-      header: `Thank you for activating your account`,
-      message: `You can now sign in and resume your project in Photos for macOS.`
-    })).present();
   }
 
   async showError(message: string) {
