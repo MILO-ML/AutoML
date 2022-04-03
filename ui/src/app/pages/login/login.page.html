@@ -11,10 +11,135 @@
         <img src='assets/icon/favicon.png' width='70' />
         <h1>Welcome to MILO-ML!</h1>
 
-        <p>To get started, please login below:</p>
-
-        <ion-button (click)='login()'>Login with Google</ion-button>
+        <ng-container [ngSwitch]='mode'>
+          <ng-container *ngSwitchCase='modes.SignIn'><ng-container *ngTemplateOutlet='signInTemplate'></ng-container></ng-container>
+          <ng-container *ngSwitchCase='modes.SignUp'><ng-container *ngTemplateOutlet='signUpTemplate'></ng-container></ng-container>
+          <ng-container *ngSwitchCase='modes.FinishSignUp'><ng-container *ngTemplateOutlet='finishSignUpTemplate'></ng-container></ng-container>
+          <ng-container *ngSwitchCase='modes.ForgotPassword'><ng-container *ngTemplateOutlet='forgotPasswordTemplate'></ng-container></ng-container>
+          <ng-container *ngSwitchCase='modes.ResetPassword'><ng-container *ngTemplateOutlet='resetPasswordTemplate'></ng-container></ng-container>
+          <ng-container *ngSwitchCase='modes.ConfirmEmail'><ng-container *ngTemplateOutlet='confirmEmailTemplate'></ng-container></ng-container>
+          <ng-container *ngSwitchCase='modes.WaitingForVerification'><ng-container *ngTemplateOutlet='waitingForVerificationTemplate'></ng-container></ng-container>
+        </ng-container>
       </ion-col>
-    </ion-row>    
+    </ion-row>
   </ion-grid>
 </ion-content>
+
+<ng-template #emailFragment [formGroup]='authForm'>
+  <ion-item class='ion-no-padding'>
+      <ion-label position='stacked' i18n='@@email'>Email</ion-label>
+      <input type='email' name='email' autocomplete='email' formControlName='email'>
+  </ion-item>
+  <div class='error-container'>
+      <span class='error-message' *ngIf='authForm.get("email").dirty && !!authForm.get("email").errors?.required' i18n='@@emailRequired'>Email is required</span>
+      <span class='error-message' *ngIf='authForm.get("email").dirty && !!authForm.get("email").errors?.email' i18n='@@emailInvalid'>Email is invalid</span>
+  </div>
+</ng-template>
+
+<ng-template #passwordFragment [formGroup]='authForm'>
+  <ion-item class='ion-no-padding'>
+      <ion-label position='stacked' i18n='@@password'>Password</ion-label>
+      <input formControlName='password' type='password'>
+  </ion-item>
+  <div class='error-container'>
+      <span class='error-message' *ngIf='authForm.get("password").dirty && !!authForm.get("password").errors?.required' i18n='@@passwordRequired'>Password is required</span>
+      <span class='error-message' *ngIf='authForm.get("password").dirty && !!authForm.get("password").errors?.minlength' i18n='@@passwordLengthRequirement'>Password must be greater than 6 characters</span>
+  </div>
+</ng-template>
+
+<ng-template #providerFragment>
+  <p class='ion-padding-top ion-padding-bottom' i18n='@@signInWith'>Or sign in with:</p>
+
+  <div class='providers ion-text-center'>
+      <img src='assets/providers/apple.svg' (click)='loginWithApple()'>
+      <img src='assets/providers/google.svg' (click)='loginWithGoogle()'>
+  </div>
+</ng-template>
+
+<ng-template #signInTemplate>
+  <h1 i18n='@@signInHeader'>Sign in to your account</h1>
+
+  <ng-container *ngTemplateOutlet='emailFragment'></ng-container>
+  <ng-container *ngTemplateOutlet='passwordFragment'></ng-container>
+  <a class='ion-margin-top forgot-password' (click)='mode = modes.ForgotPassword' i18n='@@forgotPasswordLink'>Forgot your password?</a>
+
+  <ion-button mode='md' (click)='signIn()' expand='block' color='dark' i18n='@@signInButton'>Sign In</ion-button>
+  <ion-button mode='md' (click)='exit(false)' expand='block' color='secondary' i18n='@@cancel'>Cancel</ion-button>
+
+  <p i18n='@@signUpMessage'>Don't have an account? <a (click)='mode = modes.SignUp'>Sign up now</a></p>
+  <ng-container *ngTemplateOutlet='providerFragment'></ng-container>
+</ng-template>
+
+<ng-template #signUpTemplate>
+  <h1 i18n='@@signUpHeader'>Sign Up</h1>
+
+  <ng-container *ngTemplateOutlet='emailFragment'></ng-container>
+  <ion-button mode='md' (click)='sendMagicLink()' expand='block' color='dark' i18n='@@signUpButton'>Sign Up</ion-button>
+  <ion-button mode='md' (click)='exit(false)' expand='block' color='secondary' i18n='@@cancel'>Cancel</ion-button>
+
+  <p i18n='@@signInMessage'>Already have an account? <a (click)='mode = modes.SignIn'>Sign in</a></p>
+  <ng-container *ngTemplateOutlet='providerFragment'></ng-container>
+</ng-template>
+
+<ng-template #finishSignUpTemplate [formGroup]='signUpForm'>
+  <h1 i18n='@@finishSignUpHeader'>Finish Sign up</h1>
+
+  <p i18n='@@finishSignUpMessage'>Thanks for verifying your email, complete your sign up below:</p>
+
+  <ng-container *ngTemplateOutlet='emailFragment'></ng-container>
+  <ion-item class='ion-no-padding'>
+      <ion-label position='stacked' i18n='@@firstName'>First Name</ion-label>
+      <input name='fname' autocomplete='given-name' formControlName='firstName'>
+  </ion-item>
+  <div class='error-container'>
+      <span class='error-message' *ngIf='signUpForm.get("firstName").dirty && !!signUpForm.get("firstName").errors?.required' i18n='@@firstNameRequired'>First Name is required</span>
+  </div>
+
+  <ion-item class='ion-no-padding'>
+      <ion-label position='stacked' i18n='@@lastName'>Last Name</ion-label>
+      <input name='lname' autocomplete='family-name' formControlName='lastName'>
+  </ion-item>
+  <div class='error-container'>
+      <span class='error-message' *ngIf='signUpForm.get("lastName").dirty && !!signUpForm.get("lastName").errors?.required' i18n='@@lastNameRequired'>Last Name is required</span>
+  </div>
+
+  <ng-container *ngTemplateOutlet='passwordFragment'></ng-container>
+
+  <ion-button mode='md' (click)='completeSignUp()' expand='block' color='dark' i18n='@@signUpButton'>Sign Up</ion-button>
+  <ion-button mode='md' (click)='cancelSignUp()' expand='block' color='secondary' i18n='@@cancel'>Cancel</ion-button>
+</ng-template>
+
+<ng-template #forgotPasswordTemplate>
+  <h1 i18n='@@forgotPasswordHeader'>Forgot password</h1>
+
+  <ng-container *ngTemplateOutlet='emailFragment'></ng-container>
+  <ion-button mode='md' (click)='sendPasswordReset()' expand='block' color='dark' i18n='@@sendEmailButton'>Send Email</ion-button>
+  <ion-button mode='md' (click)='exit(false)' expand='block' color='secondary' i18n='@@cancel'>Cancel</ion-button>
+
+  <p i18n='@@signUpMessage'>Don't have an account? <a (click)='mode = modes.SignUp'>Sign up now</a></p>
+</ng-template>
+
+<ng-template #resetPasswordTemplate [formGroup]='signUpForm'>
+  <h1 i18n='@@resetPasswordHeader'>Reset password</h1>
+
+  <ng-container *ngTemplateOutlet='passwordFragment'></ng-container>
+
+  <ion-button mode='md' (click)='resetPassword()' expand='block' color='dark' i18n='@@resetPasswordButton'>Reset Password</ion-button>
+  <ion-button mode='md' (click)='exit(false)' expand='block' color='secondary' i18n='@@cancel'>Cancel</ion-button>
+</ng-template>
+
+<ng-template #waitingForVerificationTemplate>
+  <h1 class='larger' i18n='@@checkEmailHeader'>Check your email...</h1>
+
+  <p class='detail' i18n='@@checkEmailMessage1'>An activation link has been emailed to {{authForm.value.email}}. Please follow the link from the email to finish signing up.</p>
+
+  <p class='detail' i18n='@@checkEmailMessage2'>If you haven’t gotten an email, please check your spam, or, <a (click)='mode = modes.SignUp'>correct the email address</a>.</p>
+</ng-template>
+
+<ng-template #confirmEmailTemplate>
+  <h1 i18n='@@completeVerificationHeader'>Complete Email Verification</h1>
+
+  <ng-container *ngTemplateOutlet='emailFragment'></ng-container>
+  <ion-button mode='md' (click)='validateMagicLink()' expand='block' color='dark' i18n='@@confirmEmailButton'>Confirm Email</ion-button>
+  <ion-button mode='md' (click)='mode = modes.SignUp' expand='block' color='secondary' i18n='@@cancel'>Cancel</ion-button>
+</ng-template>
