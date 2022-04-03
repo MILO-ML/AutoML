@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { Auth, authState, signOut } from '@angular/fire/auth';
 import { catchError, map } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { v4 as uuid } from 'uuid';
@@ -31,10 +31,10 @@ export class MiloApiService {
   events = new EventEmitter<string>();
 
   constructor(
-    private afAuth: AngularFireAuth,
+    private afAuth: Auth,
     private http: HttpClient
   ) {
-    this.afAuth.authState.subscribe(user => {
+    authState(this.afAuth).subscribe(user => {
       if (!user && !environment.localUser) {
         this.currentDatasetId = undefined;
         this.currentJobId = undefined;
@@ -43,7 +43,7 @@ export class MiloApiService {
 
       /** If the environment is setup for local user, log out the user */
       if (environment.localUser) {
-        this.afAuth.signOut();
+        signOut(this.afAuth);
       }
     });
 

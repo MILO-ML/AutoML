@@ -1,5 +1,6 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { applyActionCode, Auth, AuthProvider, confirmPasswordReset, getAdditionalUserInfo, OAuthProvider, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, signInWithRedirect, signOut, updatePassword, updateProfile, UserCredential } from '@angular/fire/auth';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
@@ -39,18 +40,13 @@ export class LoginPageComponent {
 
   constructor(
     private route: ActivatedRoute,
-    private afAuth: AngularFireAuth,
+    private afAuth: Auth,
     private loadingController: LoadingController,
     private alertController: AlertController,
     private toastController: ToastController,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) { }
-
-  async login() {
-    const redirect = this.route.snapshot.params.redirectTo;
-    // await this.afAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-    this.router.navigateByUrl(redirect ? redirect : '/search');
-  }
 
   ionViewWillEnter() {
     const email = localStorage.getItem('emailForSignIn');
@@ -94,7 +90,7 @@ export class LoginPageComponent {
     await loading.present();
 
     try {
-      // await signInWithEmailAndPassword(this.afAuth, this.authForm.value.email, this.authForm.value.password);
+      await signInWithEmailAndPassword(this.afAuth, this.authForm.value.email, this.authForm.value.password);
       await this.exit(true);
     } catch (err) {
       this.showError(`Invalid login, please verify and try again.`);
@@ -111,7 +107,7 @@ export class LoginPageComponent {
     await loading.present();
 
     try {
-      // await this.mimeoService.sendPasswordReset(this.authForm.value.email, this.getRedirectUrl());
+      await sendPasswordResetEmail(this.afAuth, this.authForm.value.email);
       await this.showError(`Password reset has been sent. Please check your email for instructions.`);
     } catch (err) {
       await this.showError(`Account not found, please verify an account with that email exists and try again.`);
@@ -132,7 +128,7 @@ export class LoginPageComponent {
     let user;
     try {
       user = await this.afAuth.currentUser;
-      // await updatePassword(user, this.authForm.value.password);
+      await updatePassword(user, this.authForm.value.password);
     } catch (err) {
       await this.showError(`Unable to update your password.`);
       await loading.dismiss();
@@ -141,7 +137,7 @@ export class LoginPageComponent {
 
     const displayName = this.signUpForm.value.firstName + ' ' + this.signUpForm.value.lastName;
     const photoURL = await this.getGravatarURL(user.email);
-    // await updateProfile(user, { displayName, photoURL });
+    await updateProfile(user, { displayName, photoURL });
     await loading.dismiss();
     await this.exit(true);
   }
@@ -156,21 +152,21 @@ export class LoginPageComponent {
 
     localStorage.removeItem('emailForSignIn');
 
-    // let reply: UserCredential;
+    let reply: UserCredential;
     try {
-      // reply = await signInWithEmailLink(this.afAuth, this.authForm.value.email);
+      reply = await signInWithEmailLink(this.afAuth, this.authForm.value.email);
     } catch (err) {
       await loading.dismiss();
       await this.showError(`The email address entered does not match or the verification link has expired.`);
       return;
     }
 
-    // if (getAdditionalUserInfo(reply).isNewUser) {
-    //   this.mode = Modes.FinishSignUp;
-    //   this.authForm.get('email').disable();
-    // } else {
-    //   await this.exit(false);
-    // }
+    if (getAdditionalUserInfo(reply).isNewUser) {
+      this.mode = Modes.FinishSignUp;
+      this.authForm.get('email').disable();
+    } else {
+      await this.exit(false);
+    }
 
     await loading.dismiss();
   }
@@ -184,7 +180,7 @@ export class LoginPageComponent {
     await loading.present();
 
     try {
-      // await this.mimeoService.sendMagicLink(this.authForm.value.email, this.getRedirectUrl());
+      await signInWithEmailLink(this.afAuth, this.authForm.value.email, this.getRedirectUrl());
       await loading.dismiss();
     } catch (err) {
       await loading.dismiss();
@@ -204,14 +200,14 @@ export class LoginPageComponent {
   }
 
   loginWithGoogle() {
-    // const provider = new OAuthProvider('google.com');
-    // provider.setCustomParameters({ prompt: 'select_account' });
-    // this.loginWithPopup(provider);
+    const provider = new OAuthProvider('google.com');
+    provider.setCustomParameters({ prompt: 'select_account' });
+    this.loginWithPopup(provider);
   }
 
   loginWithApple() {
-    // const provider = new OAuthProvider('apple.com');
-    // this.loginWithPopup(provider);
+    const provider = new OAuthProvider('apple.com');
+    this.loginWithPopup(provider);
   }
 
   async exit(success = true) {
@@ -228,7 +224,7 @@ export class LoginPageComponent {
         }
       }
 
-      this.router.navigate(['/search']);
+      this.router.navigateByUrl(this.getRedirectUrl());  
     } else {
       this.router.navigate(['/']);
     }
@@ -244,7 +240,7 @@ export class LoginPageComponent {
     await loading.present();
 
     try {
-      // await confirmPasswordReset(this.afAuth, this.route.snapshot.queryParams.oobCode, this.authForm.value.password);
+      await confirmPasswordReset(this.afAuth, this.route.snapshot.queryParams.oobCode, this.authForm.value.password);
       await this.showError(`Password reset was successful`);
       this.mode = Modes.SignIn;
     } catch (err) {
@@ -254,41 +250,41 @@ export class LoginPageComponent {
     }
   }
 
-  // private async loginWithPopup(provider: AuthProvider) {
-  //   const loading = await this.loadingController.create();
-  //   await loading.present();
+  private async loginWithPopup(provider: AuthProvider) {
+    const loading = await this.loadingController.create();
+    await loading.present();
 
-  //   signInWithPopup(this.afAuth, provider).then(
-  //     async reply => {
-  //       await loading.dismiss();
-  //       await this.exit(true);
-  //     },
-  //     async error => {
-  //       await loading.dismiss();
+    signInWithPopup(this.afAuth, provider).then(
+      async reply => {
+        await loading.dismiss();
+        await this.exit(true);
+      },
+      async error => {
+        await loading.dismiss();
 
-  //       if (error.code === 'auth/popup-blocked' || error.code === 'auth/operation-not-supported-in-this-environment') {
-  //         await this.loginWithRedirect(provider);
-  //         return;
-  //       }
+        if (error.code === 'auth/popup-blocked' || error.code === 'auth/operation-not-supported-in-this-environment') {
+          await this.loginWithRedirect(provider);
+          return;
+        }
 
-  //       await this.showError(`Unable to login, please verify your credentials and try again.`);
-  //     }
-  //   );
-  // }
+        await this.showError(`Unable to login, please verify your credentials and try again.`);
+      }
+    );
+  }
 
-  // private async loginWithRedirect(provider: AuthProvider) {
-  //   try {
-  //     localStorage.setItem('redirectUrl', this.getRedirectUrl());
-  //     await signInWithRedirect(this.afAuth, provider);
-  //   } catch (err) {
-  //     await this.showError(`Unable to login, please verify your credentials and try again.`);
-  //   }
-  // }
+  private async loginWithRedirect(provider: AuthProvider) {
+    try {
+      localStorage.setItem('redirectUrl', this.getRedirectUrl());
+      await signInWithRedirect(this.afAuth, provider);
+    } catch (err) {
+      await this.showError(`Unable to login, please verify your credentials and try again.`);
+    }
+  }
 
   private detectMode() {
     switch (this.router.url.split('?')[0]) {
       case '/sign-out':
-        // signOut(this.afAuth);
+        signOut(this.afAuth);
         return Modes.SignIn;
       case '/sign-up':
         return Modes.SignUp;
@@ -317,7 +313,7 @@ export class LoginPageComponent {
     await loading.present();
 
     try {
-      // await applyActionCode(this.afAuth, code);
+      await applyActionCode(this.afAuth, code);
       await this.showError(`Your email address has been verified`);
     } catch (err) {
       this.showError(`Unable to complete email verification. Please ensure a valid link is used and try again.`);
@@ -332,15 +328,15 @@ export class LoginPageComponent {
     email = `${mailbox}@${fragments[1]}`;
     const url = `https://www.gravatar.com/avatar/${md5(email)}?d=404`;
     try {
-      // await this.http.head(url).toPromise();
-      // return url;
+      await this.http.head(url).toPromise();
+      return url;
     } catch (err) {
       return undefined;
     }
   }
 
   private getRedirectUrl() {
-    return this.route.snapshot.queryParams.redirect_url || '/';
+    return this.route.snapshot.params.redirectTo || '/search';
   }
 
   private async showExtensionNotice() {

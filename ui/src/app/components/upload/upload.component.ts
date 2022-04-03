@@ -1,6 +1,6 @@
 import { Component, ElementRef, EventEmitter, Input, Output, OnInit, OnDestroy } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { Auth, authState } from '@angular/fire/auth';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { parse } from 'papaparse';
@@ -35,7 +35,7 @@ export class UploadComponent implements OnInit, OnDestroy {
 
   constructor(
     public api: MiloApiService,
-    private afAuth: AngularFireAuth,
+    private afAuth: Auth,
     private alertController: AlertController,
     private datePipe: DatePipe,
     private element: ElementRef,
@@ -51,7 +51,7 @@ export class UploadComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.afAuth.authState.pipe(
+    authState(this.afAuth).pipe(
       takeUntil(this.destroy$)
     ).subscribe(user => {
       if (user) {

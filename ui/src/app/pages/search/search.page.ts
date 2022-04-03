@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, ElementRef, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { Auth, signOut } from '@angular/fire/auth';
 import { MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PopoverController } from '@ionic/angular';
@@ -36,7 +36,7 @@ export class SearchPageComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     public activatedRoute: ActivatedRoute,
     public api: MiloApiService,
-    private afAuth: AngularFireAuth,
+    private afAuth: Auth,
     private element: ElementRef,
     private popoverController: PopoverController,
     private router: Router
@@ -150,7 +150,7 @@ export class SearchPageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async signOut() {
-    await this.afAuth.signOut();
+    await signOut(this.afAuth);
     this.router.navigateByUrl('/login');
   }
 }

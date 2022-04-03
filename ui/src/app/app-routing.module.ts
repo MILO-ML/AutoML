@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { AngularFireAuthGuard, redirectUnauthorizedTo } from '@angular/fire/compat/auth-guard';
+import { AuthGuard, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 
 import { environment } from '../environments/environment';
 
@@ -10,31 +10,31 @@ const routes: Routes = [
   { path: 'login', loadChildren: () => import('./pages/login/login.module').then(m => m.LoginPageModule) },
   {
     path: 'search',
-    ...(environment.localUser ? {} : {canActivate: [AngularFireAuthGuard]}),
+    ...(environment.localUser ? {} : {canActivate: [AuthGuard]}),
     data: { authGuardPipe: redirectUnauthorizedToLogin },
     loadChildren: () => import('./pages/search/search.module').then(m => m.SearchPageModule)
   },
   {
     path: 'search/:dataId/:step',
-    ...(environment.localUser ? {} : {canActivate: [AngularFireAuthGuard]}),
+    ...(environment.localUser ? {} : {canActivate: [AuthGuard]}),
     data: { authGuardPipe: redirectUnauthorizedToLogin },
     loadChildren: () => import('./pages/search/search.module').then(m => m.SearchPageModule)
   },
   {
     path: 'search/:dataId/job/:jobId/:step',
-    ...(environment.localUser ? {} : {canActivate: [AngularFireAuthGuard]}),
+    ...(environment.localUser ? {} : {canActivate: [AuthGuard]}),
     data: { authGuardPipe: redirectUnauthorizedToLogin },
     loadChildren: () => import('./pages/search/search.module').then(m => m.SearchPageModule)
   },
   {
     path: 'search/:dataId/job/:jobId/:step/:taskId/status',
-    ...(environment.localUser ? {} : {canActivate: [AngularFireAuthGuard]}),
+    ...(environment.localUser ? {} : {canActivate: [AuthGuard]}),
     data: { authGuardPipe: redirectUnauthorizedToLogin },
     loadChildren: () => import('./pages/search/search.module').then(m => m.SearchPageModule)
   },
   {
     path: 'model/:id',
-    ...(environment.localUser ? {} : {canActivate: [AngularFireAuthGuard]}),
+    ...(environment.localUser ? {} : {canActivate: [AuthGuard]}),
     data: { authGuardPipe: redirectUnauthorizedToLogin },
     loadChildren: () => import('./pages/run-model/run-model.module').then(m => m.RunModelPageModule)
   },
@@ -44,7 +44,7 @@ const routes: Routes = [
   },
   {
     path: 'home',
-    ...(environment.localUser ? {} : {canActivate: [AngularFireAuthGuard]}),
+    ...(environment.localUser ? {} : {canActivate: [AuthGuard]}),
     data: { authGuardPipe: redirectUnauthorizedToLogin },
     loadChildren: () => import('./pages/home/home.module').then( m => m.HomePageModule)
   },
