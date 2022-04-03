@@ -1,10 +1,8 @@
 import { Component, Input } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
-import firebase from 'firebase/app';
-import 'firebase/auth';
 import md5 from 'md5';
 
 enum Modes {
@@ -50,7 +48,7 @@ export class LoginPageComponent {
 
   async login() {
     const redirect = this.route.snapshot.params.redirectTo;
-    await this.afAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    // await this.afAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
     this.router.navigateByUrl(redirect ? redirect : '/search');
   }
 
@@ -131,7 +129,7 @@ export class LoginPageComponent {
     const loading = await this.loadingController.create();
     await loading.present();
 
-    let user: firebase.User;
+    let user;
     try {
       user = await this.afAuth.currentUser;
       // await updatePassword(user, this.authForm.value.password);

@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
-import { AngularFireModule } from '@angular/fire';
-import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFireAuthGuardModule } from '@angular/fire/auth-guard';
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFireAnalyticsModule } from '@angular/fire/compat/analytics';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { AngularFireAuthGuardModule } from '@angular/fire/compat/auth-guard';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouteReuseStrategy } from '@angular/router';
