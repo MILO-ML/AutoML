@@ -14,7 +14,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "allowedCommonJsDependencies": ["papaparse", "save-svg-as-png", "file-saver", "uuid"],
+            "allowedCommonJsDependencies": ["papaparse", "save-svg-as-png", "file-saver", "uuid", "md5"],
             "outputPath": "www",
             "index": "src/index.html",
             "main": "src/main.ts",

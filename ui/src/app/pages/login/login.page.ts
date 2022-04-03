@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
+import { Location } from '@angular/common';
 import {
   applyActionCode, Auth, AuthProvider, confirmPasswordReset, getAdditionalUserInfo, OAuthProvider, sendPasswordResetEmail, signInWithEmailAndPassword,
   signInWithEmailLink, signInWithPopup, signInWithRedirect, signOut, updatePassword, updateProfile, UserCredential
@@ -47,7 +48,8 @@ export class LoginPageComponent {
     private loadingController: LoadingController,
     private toastController: ToastController,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private location: Location
   ) { }
 
   ionViewWillEnter() {
@@ -110,7 +112,7 @@ export class LoginPageComponent {
 
     try {
       await sendPasswordResetEmail(this.afAuth, this.authForm.value.email, {
-        url: this.getRedirectUrl(),
+        url: location.origin + this.getRedirectUrl(),
         handleCodeInApp: true
       });
       await this.showError(`Password reset has been sent. Please check your email for instructions.`);
@@ -171,7 +173,7 @@ export class LoginPageComponent {
       this.mode = Modes.FinishSignUp;
       this.authForm.get('email').disable();
     } else {
-      await this.exit(false);
+      await this.exit(true);
     }
 
     await loading.dismiss();
@@ -190,11 +192,11 @@ export class LoginPageComponent {
         url: location.origin + this.getRedirectUrl(),
         handleCodeInApp: true
       });
-      await loading.dismiss();
     } catch (err) {
-      await loading.dismiss();
       await this.showError(`Unable to register an account. Please verify you are not already registered and the email address is valid then try again.`);
       return;
+    } finally {
+      await loading.dismiss();
     }
 
     localStorage.setItem('emailForSignIn', this.authForm.value.email);
@@ -221,9 +223,13 @@ export class LoginPageComponent {
         url = new URL(this.route.snapshot.queryParams.continueUrl);
       }
 
-      this.router.navigateByUrl(url ? url.pathname : this.getRedirectUrl());
+      if (url) {
+        window.location.href = url;
+      } else {
+        this.router.navigateByUrl(this.getRedirectUrl());
+      }
     } else {
-      this.router.navigate(['/']);
+      this.location.back();
     }
   }
 
@@ -252,7 +258,7 @@ export class LoginPageComponent {
     await loading.present();
 
     signInWithPopup(this.afAuth, provider).then(
-      async reply => {
+      async () => {
         await loading.dismiss();
         await this.exit(true);
       },
