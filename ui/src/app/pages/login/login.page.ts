@@ -107,7 +107,10 @@ export class LoginPageComponent {
     await loading.present();
 
     try {
-      await sendPasswordResetEmail(this.afAuth, this.authForm.value.email);
+      await sendPasswordResetEmail(this.afAuth, this.authForm.value.email, {
+        url: this.getRedirectUrl(),
+        handleCodeInApp: true
+      });
       await this.showError(`Password reset has been sent. Please check your email for instructions.`);
       this.mode = Modes.WaitingForVerification;
     } catch (err) {
