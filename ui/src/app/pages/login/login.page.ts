@@ -16,14 +16,14 @@ import packageJson from '../../../../../package.json';
 import { MiloApiService } from 'src/app/services';
 
 enum Modes {
-  SignIn = '/sign-in',
-  SignUp = '/sign-up',
-  FinishSignUp = '',
-  ResetPassword = '',
-  ForgotPassword = '/forgot-password',
-  ConfirmEmail = '',
-  WaitingForVerification = '',
-  Redirecting = ''
+  SignIn,
+  SignUp,
+  FinishSignUp,
+  ResetPassword,
+  ForgotPassword,
+  ConfirmEmail,
+  WaitingForVerification,
+  Redirecting
 }
 
 @Component({
@@ -270,8 +270,14 @@ export class LoginPageComponent {
 
   setMode(mode: Modes) {
     this.mode = mode;
-    if (mode !== '') {
-      window.history.pushState({}, '', mode);
+
+    switch (mode) {
+      case Modes.SignIn:
+        window.history.pushState({}, '', '/sign-in');
+      case Modes.SignUp:
+        window.history.pushState({}, '', '/sign-up');
+      case Modes.ForgotPassword:
+        window.history.pushState({}, '', '/forgot-password');
     }
   }
 
