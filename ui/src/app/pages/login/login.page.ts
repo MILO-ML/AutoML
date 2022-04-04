@@ -273,11 +273,11 @@ export class LoginPageComponent {
 
     switch (mode) {
       case Modes.SignIn:
-        window.history.pushState({}, '', '/sign-in');
+        window.history.pushState({}, '', '/auth/sign-in');
       case Modes.SignUp:
-        window.history.pushState({}, '', '/sign-up');
+        window.history.pushState({}, '', '/auth/sign-up');
       case Modes.ForgotPassword:
-        window.history.pushState({}, '', '/forgot-password');
+        window.history.pushState({}, '', '/auth/forgot-password');
     }
   }
 
