@@ -16,13 +16,14 @@ import packageJson from '../../../../../package.json';
 import { MiloApiService } from 'src/app/services';
 
 enum Modes {
-  SignIn,
-  SignUp,
-  FinishSignUp,
-  ResetPassword,
-  ForgotPassword,
-  ConfirmEmail,
-  WaitingForVerification
+  SignIn = '/sign-in',
+  SignUp = '/sign-up',
+  FinishSignUp = '',
+  ResetPassword = '',
+  ForgotPassword = '/forgot-password',
+  ConfirmEmail = '',
+  WaitingForVerification = '',
+  Redirecting = ''
 }
 
 @Component({
@@ -46,6 +47,7 @@ export class LoginPageComponent {
     }
   );
   version = packageJson.version;
+  redirectReason: 'passwordReset' | 'signUp';
 
   constructor(
     public api: MiloApiService,
@@ -228,15 +230,18 @@ export class LoginPageComponent {
 
   async exit(success = true) {
     if (success) {
-      let url;
       if (this.route.snapshot.queryParams.continueUrl) {
-        url = new URL(this.route.snapshot.queryParams.continueUrl);
-      }
-
-      if (url) {
-        window.location.href = url;
+        const url = new URL(this.route.snapshot.queryParams.continueUrl);
+        if (url.origin === location.origin) {
+          this.router.navigateByUrl(url.pathname);
+          delete this.mode;
+        } else {
+          this.mode = Modes.Redirecting;
+          setTimeout(() => window.location.href = url.toString(), 5000);
+        }
       } else {
         this.router.navigateByUrl(this.getRedirectUrl());
+        delete this.mode;
       }
     } else {
       this.location.back();
@@ -260,6 +265,13 @@ export class LoginPageComponent {
       await this.showError(`Unable to reset your password. Please ensure the reset password link is valid and try again.`);
     } finally {
       await loading.dismiss();
+    }
+  }
+
+  setMode(mode: Modes) {
+    this.mode = mode;
+    if (mode !== '') {
+      window.history.pushState({}, '', mode);
     }
   }
 

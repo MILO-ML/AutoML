@@ -29,6 +29,7 @@
           <ng-container *ngSwitchCase='modes.ResetPassword'><ng-container *ngTemplateOutlet='resetPasswordTemplate'></ng-container></ng-container>
           <ng-container *ngSwitchCase='modes.ConfirmEmail'><ng-container *ngTemplateOutlet='confirmEmailTemplate'></ng-container></ng-container>
           <ng-container *ngSwitchCase='modes.WaitingForVerification'><ng-container *ngTemplateOutlet='waitingForVerificationTemplate'></ng-container></ng-container>
+          <ng-container *ngSwitchCase='modes.Redirecting'><ng-container *ngTemplateOutlet='redirectingTemplate'></ng-container></ng-container>
         </ng-container>
       </ion-col>
     </ion-row>
@@ -70,12 +71,12 @@
 
   <ng-container *ngTemplateOutlet='emailFragment'></ng-container>
   <ng-container *ngTemplateOutlet='passwordFragment'></ng-container>
-  <a class='ion-margin-top forgot-password' (click)='mode = modes.ForgotPassword'>Forgot your password?</a>
+  <a class='ion-margin-top forgot-password' (click)='setMode(modes.ForgotPassword)'>Forgot your password?</a>
 
   <ion-button mode='md' (click)='signIn()' expand='block' color='primary'>Sign In</ion-button>
   <ion-button mode='md' (click)='exit(false)' expand='block' color='light'>Cancel</ion-button>
 
-  <p>Don't have an account? <a (click)='mode = modes.SignUp'>Sign up now</a></p>
+  <p>Don't have an account? <a (click)='setMode(modes.SignUp)'>Sign up now</a></p>
   <ng-container *ngTemplateOutlet='providerFragment'></ng-container>
 </ng-template>
 
@@ -86,7 +87,7 @@
   <ion-button mode='md' (click)='sendMagicLink()' expand='block' color='primary'>Sign Up</ion-button>
   <ion-button mode='md' (click)='exit(false)' expand='block' color='light'>Cancel</ion-button>
 
-  <p>Already have an account? <a (click)='mode = modes.SignIn'>Sign in</a></p>
+  <p>Already have an account? <a (click)='setMode(modes.SignIn)'>Sign in</a></p>
   <ng-container *ngTemplateOutlet='providerFragment'></ng-container>
 </ng-template>
 
@@ -125,7 +126,7 @@
   <ion-button mode='md' (click)='sendPasswordReset()' expand='block' color='primary'>Send Email</ion-button>
   <ion-button mode='md' (click)='exit(false)' expand='block' color='light'>Cancel</ion-button>
 
-  <p>Don't have an account? <a (click)='mode = modes.SignUp'>Sign up now</a></p>
+  <p>Don't have an account? <a (click)='setMode(modes.SignUp)'>Sign up now</a></p>
 </ng-template>
 
 <ng-template #resetPasswordTemplate [formGroup]='signUpForm'>
@@ -140,9 +141,9 @@
 <ng-template #waitingForVerificationTemplate>
   <h1 class='larger'>Check your email...</h1>
 
-  <p class='detail'>An activation link has been emailed to {{authForm.value.email}}. Please follow the link from the email to finish signing up.</p>
+  <p class='detail'>A link has been emailed to {{authForm.value.email}}. Please follow the link from the email to complete verification.</p>
 
-  <p class='detail'>If you haven’t gotten an email, please check your spam, or, <a (click)='mode = modes.SignUp'>correct the email address</a>.</p>
+  <p class='detail'>If you haven't gotten an email, please check your spam, or, <a (click)='setMode(modes.SignUp)'>correct the email address</a>.</p>
 </ng-template>
 
 <ng-template #confirmEmailTemplate>
@@ -150,5 +151,14 @@
 
   <ng-container *ngTemplateOutlet='emailFragment'></ng-container>
   <ion-button mode='md' (click)='validateMagicLink()' expand='block' color='primary'>Confirm Email</ion-button>
-  <ion-button mode='md' (click)='mode = modes.SignUp' expand='block' color='light'>Cancel</ion-button>
+  <ion-button mode='md' (click)='setMode(modes.SignUp)' expand='block' color='light'>Cancel</ion-button>
+</ng-template>
+
+<ng-template #redirectingTemplate>
+  <h1 class='larger'>Redirecting back...</h1>
+
+  <p class='detail' *ngIf='redirectReason === "signUp"'>Your account has been created successfully!</p>
+  <p class='detail' *ngIf='redirectReason === "passwordReset"'>Your password has been set successfully!</p>
+
+  <p class='detail'>You are being redirected back to MILO-ML and can login with your account.</p>
 </ng-template>
