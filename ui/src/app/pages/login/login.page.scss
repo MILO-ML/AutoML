@@ -25,7 +25,7 @@
     p {
       font-size: 14px;
       font-weight: 300;
-      color: var(--ion-color-dark);
+      color: var(--ion-text-color);
     }
 
     a {
@@ -51,7 +51,7 @@
     }
 
     .detail {
-      color: var(--ion-color-dark);
+      color: var(--ion-text-color);
     }
 
     ion-button {
@@ -59,6 +59,7 @@
     }
 
     ion-item {
+      --ion-item-border-color: var(--ion-text-color);
       --inner-padding-end: 0;
 
       ion-input {
@@ -143,5 +144,13 @@
 @media (min-width: 576px) and (max-width: 1200px) {
   .footer {
     padding: 0 15px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+
+
+  .google-provider {
+    content: url('/assets/providers/google-dark.svg');
   }
 }
