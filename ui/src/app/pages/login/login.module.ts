@@ -37,8 +37,6 @@ const routes: Routes = [
   },
   {
     path: 'continue',
-    ...(environment.localUser ? {} : { canActivate: [AuthGuard] }),
-    data: { authGuardPipe: redirectAuthorizedToHome },
     component: LoginPageComponent
   },
   {

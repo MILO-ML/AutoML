@@ -47,7 +47,7 @@ export class LoginPageComponent {
     }
   );
   version = packageJson.version;
-  redirectReason: 'passwordReset' | 'signUp';
+  redirectReason: 'passwordReset' | 'signUp' | 'magicLink';
   navigationHistory = [];
 
   constructor(
