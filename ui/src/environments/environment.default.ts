@@ -1,5 +1,6 @@
 export const environment = {
   name: 'default',
+  authOnly: false,
   localUser: false,
   production: false,
   firebase: {

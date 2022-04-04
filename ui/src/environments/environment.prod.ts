@@ -4,5 +4,6 @@ export const environment = {
   ...defaults,
   name: 'web',
   apiUrl: 'https://api.milo-ml.com',
-  production: true
+  production: true,
+  authOnly: true
 };
