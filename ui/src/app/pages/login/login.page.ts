@@ -13,7 +13,7 @@ import md5 from 'md5';
 
 import { environment } from '../../../environments/environment';
 import packageJson from '../../../../../package.json';
-import { MiloApiService } from 'src/app/services';
+import { MiloApiService } from '../../services';
 
 enum Modes {
   SignIn,
@@ -48,6 +48,7 @@ export class LoginPageComponent {
   );
   version = packageJson.version;
   redirectReason: 'passwordReset' | 'signUp';
+  navigationHistory = [];
 
   constructor(
     public api: MiloApiService,
@@ -71,7 +72,7 @@ export class LoginPageComponent {
     }
 
     if (this.mode === undefined) {
-      this.mode = this.detectMode();
+      this.setMode(this.detectMode());
     }
 
     if (this.route.snapshot.queryParams.mode === 'verifyEmail') {
@@ -128,7 +129,7 @@ export class LoginPageComponent {
         handleCodeInApp: true
       });
       await this.showError(`Password reset has been sent. Please check your email for instructions.`);
-      this.mode = Modes.WaitingForVerification;
+      this.setMode(Modes.WaitingForVerification);
     } catch (err) {
       await this.showError(`Account not found, please verify an account with that email exists and try again.`);
     } finally {
@@ -182,7 +183,7 @@ export class LoginPageComponent {
     }
 
     if (getAdditionalUserInfo(reply).isNewUser) {
-      this.mode = Modes.FinishSignUp;
+      this.setMode(Modes.FinishSignUp);
       this.authForm.get('email').disable();
     } else {
       await this.exit(true);
@@ -212,7 +213,7 @@ export class LoginPageComponent {
     }
 
     localStorage.setItem('emailForSignIn', this.authForm.value.email);
-    this.mode = Modes.WaitingForVerification;
+    this.setMode(Modes.WaitingForVerification);
   }
 
   async cancelSignUp() {
@@ -236,7 +237,7 @@ export class LoginPageComponent {
           this.router.navigateByUrl(url.pathname);
           delete this.mode;
         } else {
-          this.mode = Modes.Redirecting;
+          this.setMode(Modes.Redirecting);
           setTimeout(() => window.location.href = url.toString(), 5000);
         }
       } else {
@@ -244,7 +245,12 @@ export class LoginPageComponent {
         delete this.mode;
       }
     } else {
-      this.location.back();
+      if (this.navigationHistory.length) {
+        const mode = this.navigationHistory.pop();
+        this.mode = mode;
+      } else {
+        this.router.navigateByUrl('/');
+      }
     }
   }
 
@@ -269,16 +275,8 @@ export class LoginPageComponent {
   }
 
   setMode(mode: Modes) {
+    this.navigationHistory.push(this.mode ?? mode);
     this.mode = mode;
-
-    switch (mode) {
-      case Modes.SignIn:
-        window.history.pushState({}, '', '/auth/sign-in');
-      case Modes.SignUp:
-        window.history.pushState({}, '', '/auth/sign-up');
-      case Modes.ForgotPassword:
-        window.history.pushState({}, '', '/auth/forgot-password');
-    }
   }
 
   private async loginWithPopup(provider: AuthProvider) {
@@ -314,12 +312,12 @@ export class LoginPageComponent {
 
   private detectMode() {
     switch (this.router.url.split('?')[0]) {
-      case '/sign-out':
+      case '/auth/sign-out':
         signOut(this.afAuth);
         return Modes.SignIn;
-      case '/sign-up':
+      case '/auth/sign-up':
         return Modes.SignUp;
-      case '/forgot-password':
+      case '/auth/forgot-password':
         return Modes.ForgotPassword;
       case '/auth/continue':
         const mode = this.route.snapshot.queryParams.mode;
@@ -332,7 +330,7 @@ export class LoginPageComponent {
           default:
             return Modes.SignIn;
         }
-      case '/check-email':
+      case '/auth/check-email':
         return Modes.WaitingForVerification;
       default:
         return Modes.SignIn;
