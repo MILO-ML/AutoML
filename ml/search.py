@@ -93,7 +93,7 @@ def find_best_model(
 
     performance_report = open(output_path + '/performance_report.csv', 'w+')
     performance_report_writer = csv.writer(performance_report)
-    performance_report_writer.writerow(['key', 'train_time'])
+    performance_report_writer.writerow(['key', 'train_time (s)'])
 
     for index, (estimator, scaler, feature_selector, searcher) in enumerate(all_pipelines):
 
@@ -167,6 +167,10 @@ def find_best_model(
 
                 report_writer.writerow(list([str(i) for i in result.values()]))
 
+    train_time = timer() - start
+    print('\tTotal run time is {:.4f} seconds'.format(train_time), '\n')
+    performance_report_writer.writerow(['total', train_time])
+
     report.close()
     performance_report.close()
     print('Total fits generated', sum(total_fits.values()))
@@ -192,6 +196,4 @@ def find_best_model(
             existing_metadata.update(metadata)
             json.dump(existing_metadata, metafile)
 
-    train_time = timer() - start
-    print('\tTotal run time is {:.4f} seconds'.format(train_time), '\n')
     return True
