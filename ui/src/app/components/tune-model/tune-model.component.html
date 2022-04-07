@@ -1,6 +1,6 @@
 <ion-content>
   <ion-item lines='none' *ngIf='threshold'>
-    <ion-label>Decision Threshold ({{threshold | number:'1.2-2'}})</ion-label>
+    <ion-label position='floating'>Decision Threshold ({{threshold | number:'1.2-2'}})</ion-label>
     <ion-range min='.3' max='.7' step='.05' snaps='true' ticks='true' [value]='threshold' (ionChange)='threshold = $event.target.value' color='primary'>
       <ion-label slot='start'>.3</ion-label>
       <ion-label slot='end'>.7</ion-label>
