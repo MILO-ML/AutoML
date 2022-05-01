@@ -15,7 +15,7 @@ def preprocess(features, pipeline, data):
     if 'feature_selector' in pipeline.named_steps:
         feature_selector_type = pipeline.named_steps['feature_selector'].__class__.__module__
 
-        if 'sklearn.feature_selection.univariate_selection' in feature_selector_type or\
+        if 'univariate_selection' in feature_selector_type or\
           'processors.rffi' in feature_selector_type:
 
             # Identify the selected featured for model provided
