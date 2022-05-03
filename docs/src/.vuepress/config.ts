@@ -1,43 +1,29 @@
-const { description } = require('../../package')
-const { version } = require('../../../package')
+import { backToTopPlugin } from '@vuepress/plugin-back-to-top';
+import { mediumZoomPlugin } from '@vuepress/plugin-medium-zoom';
+import { searchPlugin } from '@vuepress/plugin-search';
+import { defaultTheme, defineUserConfig } from 'vuepress'
+import { description, version } from '../../package.json';
 
-module.exports = {
+export default defineUserConfig({
   base: '/docs/',
-
-  /**
-   * Ref：https://v1.vuepress.vuejs.org/config/#title
-   */
+  lang: 'en-US',
   title: `Machine Intelligence Learning Optimizer (MILO-ML) Documentation (v${version})`,
-  /**
-   * Ref：https://v1.vuepress.vuejs.org/config/#description
-   */
-  description: description,
-
+  description,
   dest: '../static/docs',
-
-  /**
-   * Extra tags to be injected to the page HTML `<head>`
-   *
-   * ref：https://v1.vuepress.vuejs.org/config/#head
-   */
   head: [
     ['meta', { name: 'theme-color', content: '#3880ff' }],
     ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
     ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }]
   ],
-
-  /**
-   * Theme configuration, here is the default theme configuration for VuePress.
-   *
-   * ref：https://v1.vuepress.vuejs.org/theme/default-theme-config.html
-   */
-  themeConfig: {
+  theme: defaultTheme({
     repo: '',
     editLinks: false,
+    contributors: false,
     docsDir: '',
     editLinkText: '',
     lastUpdated: false,
-    nav: [
+    plugins: [backToTopPlugin(), mediumZoomPlugin(), searchPlugin()],
+    navbar: [
       {
         text: 'Auto-ML Guide',
         link: '/auto-ml-guide/',
@@ -53,9 +39,8 @@ module.exports = {
     ],
     sidebar: [
       {
-        title: 'Install Guide',
-        path: '/install-guide/',
-        collapsable: false,
+        text: 'Install Guide',
+        link: '/install-guide/',
         children: [
           '/install-guide/',
           '/install-guide/docker',
@@ -63,9 +48,8 @@ module.exports = {
         ]
       },
       {
-        title: 'Processor Guide',
-        path: '/processor-guide/',
-        collapsable: false,
+        text: 'Processor Guide',
+        link: '/processor-guide/',
         children: [
           '/processor-guide/',
           '/processor-guide/train-test-builder',
@@ -76,9 +60,8 @@ module.exports = {
         ]
       },
       {
-        title: 'Auto-ML Guide',
-        path: '/auto-ml-guide/',
-        collapsable: false,
+        text: 'Auto-ML Guide',
+        link: '/auto-ml-guide/',
         children: [
           '/auto-ml-guide/',
           '/auto-ml-guide/get-started',
@@ -100,14 +83,5 @@ module.exports = {
         ]
       }
     ]
-  },
-
-  /**
-   * Apply plugins，ref：https://v1.vuepress.vuejs.org/zh/plugin/
-   */
-  plugins: [
-    '@vuepress/plugin-back-to-top',
-    '@vuepress/plugin-medium-zoom',
-    '@snowdog/vuepress-plugin-pdf-export',
-  ]
-}
+  })
+});

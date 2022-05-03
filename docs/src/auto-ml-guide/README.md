@@ -1,3 +1,6 @@
+---
+next: ./get-started.md
+---
 # Introduction
 
 ## Welcome to MILO-ML's Auto-ML platform
