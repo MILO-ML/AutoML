@@ -1,6 +1,5 @@
 import { backToTopPlugin } from '@vuepress/plugin-back-to-top';
 import { mediumZoomPlugin } from '@vuepress/plugin-medium-zoom';
-import { searchPlugin } from '@vuepress/plugin-search';
 import { defaultTheme, defineUserConfig } from 'vuepress';
 import { description, version } from '../../package.json';
 
@@ -22,7 +21,7 @@ export default defineUserConfig({
     docsDir: '',
     editLinkText: '',
     lastUpdated: false,
-    plugins: [backToTopPlugin(), mediumZoomPlugin(), searchPlugin()],
+    plugins: [backToTopPlugin(), mediumZoomPlugin()],
     navbar: [
       {
         text: 'Auto-ML Guide',
