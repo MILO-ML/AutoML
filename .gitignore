@@ -51,10 +51,6 @@ performance_report.csv
 metadata.json
 models/
 
-# Flask stuff:
-instance/
-.webassets-cache
-
 # pyenv
 .python-version
 

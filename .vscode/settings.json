@@ -1,6 +1,10 @@
 {
-    "python.linting.pylintEnabled": true,
-    "eslint.workingDirectories": [
-      "ui"
-    ]
+  "eslint.workingDirectories": [
+    "ui"
+  ],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true
+  },
+  "files.trimTrailingWhitespace": true
 }

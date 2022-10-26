@@ -175,7 +175,7 @@ jobs:
     displayName: Build Preprocessor UI
 
   - script: |
-      pip install requests Flask licensing
+      pip install requests licensing
       python sign_educational_license.py
     displayName: Create Education License
 
