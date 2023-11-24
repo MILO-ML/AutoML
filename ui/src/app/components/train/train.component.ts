@@ -10,6 +10,7 @@ import * as pipelineOptions from '../../data/pipeline.processors.json';
 import { TextareaModalComponent } from '../../components/textarea-modal/textarea-modal.component';
 import { MiloApiService } from '../../services/milo-api/milo-api.service';
 import { requireAtLeastOneCheckedValidator } from '../../validators/at-least-one-checked.validator';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 
 @Component({
   selector: 'app-train',
@@ -36,7 +37,9 @@ export class TrainComponent implements OnDestroy, OnInit {
     private alertController: AlertController,
     private formBuilder: FormBuilder,
     private modalController: ModalController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private analytics: AngularFireAnalytics ,
+
   ) {
     this.trainForm = this.formBuilder.group({
       estimators: this.formBuilder.array(this.pipelineProcessors.estimators, requireAtLeastOneCheckedValidator()),
@@ -118,6 +121,9 @@ export class TrainComponent implements OnDestroy, OnInit {
         this.allPipelines = task.pipelines;
         this.checkStatus(task.id);
         this.pushStateStatus(task.id);
+        this.analytics.logEvent('training_started', {
+          parms: JSON.stringify(this.trainForm.value)
+         })
       },
       async () => {
         const alert = await this.alertController.create({
@@ -125,7 +131,7 @@ export class TrainComponent implements OnDestroy, OnInit {
           message: 'Please make sure the backend is reachable and try again.',
           buttons: ['Dismiss']
         });
-
+       
         this.resetState.emit();
         await alert.present();
       }

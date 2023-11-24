@@ -9,6 +9,7 @@ import { takeUntil } from 'rxjs/operators';
 
 import { MiloApiService } from '../../services/milo-api/milo-api.service';
 import { DataSets, PublishedModels } from '../../interfaces';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 
 @Component({
   selector: 'app-upload',
@@ -41,7 +42,10 @@ export class UploadComponent implements OnInit, OnDestroy {
     private element: ElementRef,
     private formBuilder: FormBuilder,
     private loadingController: LoadingController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private analytics: AngularFireAnalytics,
+
+
   ) {
     this.uploadForm = this.formBuilder.group({
       label_column: ['', Validators.required],
@@ -68,7 +72,7 @@ export class UploadComponent implements OnInit, OnDestroy {
   }
 
   async onSubmit() {
-    const loading = await this.loadingController.create({message: 'Uploading dataset...'});
+    const loading = await this.loadingController.create({ message: 'Uploading dataset...' });
     await loading.present();
     const formData = new FormData();
     formData.append('train', this.uploadForm.get('train').value);
@@ -77,7 +81,10 @@ export class UploadComponent implements OnInit, OnDestroy {
 
     this.api.submitData(formData).then(
       () => {
-        this.stepFinished.emit({nextStep: 'explore'});
+        this.analytics.logEvent('data_uploaded', {
+          step_name: 'csv_file_uploaded',
+        })
+        this.stepFinished.emit({ nextStep: 'explore' });
       },
       async error => {
         let message = 'Please make sure the backend is reachable and try again.';
@@ -98,14 +105,24 @@ export class UploadComponent implements OnInit, OnDestroy {
               break;
           }
         }
+        this.analytics.logEvent('data_uploaded_error', {
+          step_name: 'data_uploaded',
+          status_code: error.status,
+          message: message,
+          timestamp: Date.now(),
+        });
 
         const alert = await this.alertController.create({
           header: 'Unable to Upload Data',
           message,
           buttons: ['Dismiss']
         });
+        console.log('FireBase Log Event Triggered');
+
+
 
         await alert.present();
+
       }
     ).finally(() => loading.dismiss());
 
@@ -123,7 +140,7 @@ export class UploadComponent implements OnInit, OnDestroy {
 
       parse(file, {
         worker: true,
-        complete: function() {},
+        complete: function () { },
         step: async (reply, parser) => {
           parser.abort();
 
@@ -166,7 +183,7 @@ export class UploadComponent implements OnInit, OnDestroy {
 
   exploreDataSet(id) {
     this.api.currentDatasetId = id;
-    this.stepFinished.emit({nextStep: 'explore'});
+    this.stepFinished.emit({ nextStep: 'explore' });
   }
 
   async publishedOptions(model) {
@@ -245,7 +262,7 @@ export class UploadComponent implements OnInit, OnDestroy {
             try {
               await (await this.api.renamePublishedModel(model.key, data.name)).toPromise();
               this.updateView();
-            } catch(err) {
+            } catch (err) {
               this.showError(`Unable to rename the model ${model.key}.`)
             }
             await loading.dismiss();
@@ -272,7 +289,7 @@ export class UploadComponent implements OnInit, OnDestroy {
   }
 
   private async showError(message: string) {
-    const toast = await this.toastController.create({message, duration: 2000});
+    const toast = await this.toastController.create({ message, duration: 2000 });
     return toast.present();
   }
 }

@@ -5,6 +5,8 @@ import { LoadingController, AlertController } from '@ionic/angular';
 
 import { MiloApiService } from '../../services/milo-api/milo-api.service';
 import { DataAnalysisReply, Jobs } from '../../interfaces';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+
 
 @Component({
   selector: 'app-explore',
@@ -25,7 +27,9 @@ export class ExploreComponent implements OnInit {
     public api: MiloApiService,
     private alertController: AlertController,
     private datePipe: DatePipe,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private analytics: AngularFireAnalytics ,
+
   ) {}
 
   @HostBinding('class.hasJobs')
@@ -118,6 +122,9 @@ export class ExploreComponent implements OnInit {
     const loading = await this.loadingController.create({message: 'Creating new job...'});
     await loading.present();
     await this.api.createJob();
+    this.analytics.logEvent('data_reviewed', {
+      step_name: 'graphically_data_reviewed ',
+     })
     this.stepFinished.emit({nextStep: 'train', data: Object.keys(this.analysis.analysis.train.summary).length});
     await loading.dismiss();
   }

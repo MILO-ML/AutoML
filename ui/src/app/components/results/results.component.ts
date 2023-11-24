@@ -15,6 +15,8 @@ import { GeneralizationResult, MetaData, RefitGeneralization, Results } from '..
 import { MultiSelectMenuComponent } from '../multi-select-menu/multi-select-menu.component';
 import { TrainComponent } from '../train/train.component';
 import { UseModelComponent } from '../use-model/use-model.component';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+
 
 @Component({
   selector: 'app-results',
@@ -140,7 +142,9 @@ export class ResultsComponent implements OnInit {
     private loadingController: LoadingController,
     private modalController: ModalController,
     private toastController: ToastController,
-    private popoverController: PopoverController
+    private popoverController: PopoverController,
+    private analytics: AngularFireAnalytics ,
+
   ) {
     this.filterForm = this.formBuilder.group({
       query: new FormControl(''),
@@ -157,6 +161,9 @@ export class ResultsComponent implements OnInit {
 
     try {
       data = await (await this.api.getResults()).toPromise();
+      this.analytics.logEvent('results_view', {
+        step_name: 'result',
+       })
     } catch (err) {
       const alert = await this.alertController.create({
         header: 'Unable to Load Results',
