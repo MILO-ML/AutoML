@@ -28,9 +28,9 @@ export class ExploreComponent implements OnInit {
     private alertController: AlertController,
     private datePipe: DatePipe,
     private loadingController: LoadingController,
-    private analytics: AngularFireAnalytics ,
+    private analytics: AngularFireAnalytics,
 
-  ) {}
+  ) { }
 
   @HostBinding('class.hasJobs')
   get hasJobs() {
@@ -67,7 +67,7 @@ export class ExploreComponent implements OnInit {
 
   useJob(id, step) {
     this.api.currentJobId = id;
-    this.stepFinished.emit({nextStep: step, data: Object.keys(this.analysis.analysis.train.summary).length});
+    this.stepFinished.emit({ nextStep: step, data: Object.keys(this.analysis.analysis.train.summary).length });
   }
 
   async deleteJob(id) {
@@ -119,14 +119,27 @@ export class ExploreComponent implements OnInit {
   }
 
   async newJob() {
-    const loading = await this.loadingController.create({message: 'Creating new job...'});
-    await loading.present();
-    await this.api.createJob();
-    this.analytics.logEvent('data_reviewed', {
-      step_name: 'graphically_data_reviewed ',
-     })
-    this.stepFinished.emit({nextStep: 'train', data: Object.keys(this.analysis.analysis.train.summary).length});
-    await loading.dismiss();
+    try {
+      const loading = await this.loadingController.create({ message: 'Creating new job...' });
+      await loading.present();
+      await this.api.createJob();
+      this.analytics.logEvent('data_reviewed', {
+        step_name: 'graphically_data_reviewed ',
+        timestamp: Date.now(),
+
+      })
+      this.stepFinished.emit({ nextStep: 'train', data: Object.keys(this.analysis.analysis.train.summary).length });
+      await loading.dismiss();
+    }
+    catch (err) {
+      this.analytics.logEvent('data_reviewed_error', {
+        step_name: 'data_reviewed',
+        status_code: 400,
+        message: err.message,
+        timestamp: Date.now(),
+      });
+    }
+
   }
 
   private async updateJobs() {

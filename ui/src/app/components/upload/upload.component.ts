@@ -83,6 +83,8 @@ export class UploadComponent implements OnInit, OnDestroy {
       () => {
         this.analytics.logEvent('data_uploaded', {
           step_name: 'csv_file_uploaded',
+          timestamp: Date.now(),
+
         })
         this.stepFinished.emit({ nextStep: 'explore' });
       },

@@ -122,10 +122,20 @@ export class TrainComponent implements OnDestroy, OnInit {
         this.checkStatus(task.id);
         this.pushStateStatus(task.id);
         this.analytics.logEvent('training_started', {
-          parms: JSON.stringify(this.trainForm.value)
+          step_name: 'training_started',
+          parms: JSON.stringify(this.trainForm.value),
+          timestamp: Date.now(),
+          
          })
       },
       async () => {
+        this.analytics.logEvent('training_started_error', {
+          step_name: 'training_started',
+          status_code: 400,
+          parms: JSON.stringify(this.trainForm.value),
+          message: "Please make sure the backend is reachable and try again.",
+          timestamp: Date.now(),
+        });
         const alert = await this.alertController.create({
           header: 'Unable to Start Training',
           message: 'Please make sure the backend is reachable and try again.',
