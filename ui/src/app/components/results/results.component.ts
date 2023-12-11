@@ -1,5 +1,6 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { Component, ViewChild, OnInit } from '@angular/core';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -15,7 +16,6 @@ import { GeneralizationResult, MetaData, RefitGeneralization, Results } from '..
 import { MultiSelectMenuComponent } from '../multi-select-menu/multi-select-menu.component';
 import { TrainComponent } from '../train/train.component';
 import { UseModelComponent } from '../use-model/use-model.component';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 
 
 @Component({
@@ -143,7 +143,7 @@ export class ResultsComponent implements OnInit {
     private modalController: ModalController,
     private toastController: ToastController,
     private popoverController: PopoverController,
-    private analytics: AngularFireAnalytics ,
+    private afAnalytics: Analytics,
 
   ) {
     this.filterForm = this.formBuilder.group({
@@ -161,7 +161,7 @@ export class ResultsComponent implements OnInit {
 
     try {
       data = await (await this.api.getResults()).toPromise();
-      this.analytics.logEvent('results_view', {
+      logEvent(this.afAnalytics, 'results_view', {
         step_name: 'result',
        })
     } catch (err) {

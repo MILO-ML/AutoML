@@ -1,6 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, Output, OnInit, OnDestroy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Auth, authState } from '@angular/fire/auth';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { parse } from 'papaparse';
@@ -9,7 +10,6 @@ import { takeUntil } from 'rxjs/operators';
 
 import { MiloApiService } from '../../services/milo-api/milo-api.service';
 import { DataSets, PublishedModels } from '../../interfaces';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 
 @Component({
   selector: 'app-upload',
@@ -37,15 +37,13 @@ export class UploadComponent implements OnInit, OnDestroy {
   constructor(
     public api: MiloApiService,
     private afAuth: Auth,
+    private afAnalytics: Analytics,
     private alertController: AlertController,
     private datePipe: DatePipe,
     private element: ElementRef,
     private formBuilder: FormBuilder,
     private loadingController: LoadingController,
     private toastController: ToastController,
-    private analytics: AngularFireAnalytics,
-
-
   ) {
     this.uploadForm = this.formBuilder.group({
       label_column: ['', Validators.required],
@@ -81,7 +79,7 @@ export class UploadComponent implements OnInit, OnDestroy {
 
     this.api.submitData(formData).then(
       () => {
-        this.analytics.logEvent('data_uploaded', {
+        logEvent(this.afAnalytics, 'data_uploaded', {
           step_name: 'csv_file_uploaded',
           timestamp: Date.now(),
 
@@ -107,7 +105,7 @@ export class UploadComponent implements OnInit, OnDestroy {
               break;
           }
         }
-        this.analytics.logEvent('data_uploaded_error', {
+        logEvent(this.afAnalytics, 'data_uploaded_error', {
           step_name: 'data_uploaded',
           status_code: error.status,
           message: message,

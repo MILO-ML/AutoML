@@ -1,4 +1,5 @@
 import { Component, Input, EventEmitter, Output, OnInit, OnDestroy } from '@angular/core';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AlertController, ModalController, ToastController } from '@ionic/angular';
 import { of, ReplaySubject } from 'rxjs';
@@ -10,7 +11,6 @@ import * as pipelineOptions from '../../data/pipeline.processors.json';
 import { TextareaModalComponent } from '../../components/textarea-modal/textarea-modal.component';
 import { MiloApiService } from '../../services/milo-api/milo-api.service';
 import { requireAtLeastOneCheckedValidator } from '../../validators/at-least-one-checked.validator';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 
 @Component({
   selector: 'app-train',
@@ -38,7 +38,7 @@ export class TrainComponent implements OnDestroy, OnInit {
     private formBuilder: FormBuilder,
     private modalController: ModalController,
     private toastController: ToastController,
-    private analytics: AngularFireAnalytics ,
+    private afAnalytics: Analytics,
 
   ) {
     this.trainForm = this.formBuilder.group({
@@ -121,7 +121,7 @@ export class TrainComponent implements OnDestroy, OnInit {
         this.allPipelines = task.pipelines;
         this.checkStatus(task.id);
         this.pushStateStatus(task.id);
-        this.analytics.logEvent('training_started', {
+        logEvent(this.afAnalytics, 'training_started', {
           step_name: 'training_started',
           parms: JSON.stringify(this.trainForm.value),
           timestamp: Date.now(),
@@ -129,7 +129,7 @@ export class TrainComponent implements OnDestroy, OnInit {
          })
       },
       async () => {
-        this.analytics.logEvent('training_started_error', {
+        logEvent(this.afAnalytics, 'training_started_error', {
           step_name: 'training_started',
           status_code: 400,
           parms: JSON.stringify(this.trainForm.value),

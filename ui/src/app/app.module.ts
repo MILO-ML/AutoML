@@ -12,7 +12,6 @@ import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
-import { AngularFireModule } from '@angular/fire/compat';
 
 @NgModule({
     declarations: [AppComponent],
@@ -20,7 +19,6 @@ import { AngularFireModule } from '@angular/fire/compat';
         BrowserModule,
         provideFirebaseApp(() => initializeApp(environment.firebase)),
         provideAnalytics(() => getAnalytics()),
-        AngularFireModule.initializeApp(environment.firebase),
         provideAuth(() => getAuth()),
         HttpClientModule,
         IonicModule.forRoot(),

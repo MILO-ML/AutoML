@@ -1,11 +1,11 @@
 import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { MatTableDataSource } from '@angular/material/table';
 import { LoadingController, AlertController } from '@ionic/angular';
 
 import { MiloApiService } from '../../services/milo-api/milo-api.service';
 import { DataAnalysisReply, Jobs } from '../../interfaces';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 
 
 @Component({
@@ -28,7 +28,7 @@ export class ExploreComponent implements OnInit {
     private alertController: AlertController,
     private datePipe: DatePipe,
     private loadingController: LoadingController,
-    private analytics: AngularFireAnalytics,
+    private afAnalytics: Analytics,
 
   ) { }
 
@@ -123,7 +123,7 @@ export class ExploreComponent implements OnInit {
       const loading = await this.loadingController.create({ message: 'Creating new job...' });
       await loading.present();
       await this.api.createJob();
-      this.analytics.logEvent('data_reviewed', {
+      logEvent(this.afAnalytics, 'data_reviewed', {
         step_name: 'graphically_data_reviewed ',
         timestamp: Date.now(),
 
@@ -132,7 +132,7 @@ export class ExploreComponent implements OnInit {
       await loading.dismiss();
     }
     catch (err) {
-      this.analytics.logEvent('data_reviewed_error', {
+      logEvent(this.afAnalytics, 'data_reviewed_error', {
         step_name: 'data_reviewed',
         status_code: 400,
         message: err.message,
