@@ -12,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 from ldap3 import Server, Connection, SUBTREE, SIMPLE
+from ldap3.utils.conv import escape_filter_chars
 from flask import jsonify, request, abort
 
 def ldap_login():
@@ -40,7 +41,7 @@ def ldap_login():
     password = payload['password']
     
     # Determine username for search (remove domain if present)
-    search_username = username.split('@')[0]
+    search_username = escape_filter_chars(username.split('@')[0])
     
     # Set up the LDAP server connection
     server = Server(os.getenv('LDAP_SERVER'))
