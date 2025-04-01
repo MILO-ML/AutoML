@@ -70,6 +70,10 @@ EXPOSE 8443
 # env variables
 ENV LOCAL_USER true
 ENV LDAP_AUTH false
+# LDAP service account binding configuration (disabled by default)
+ENV LDAP_USE_SERVICE_ACCOUNT false
+ENV LDAP_SERVICE_ACCOUNT_DN ""
+ENV LDAP_SERVICE_ACCOUNT_PASSWORD ""
 
 # start the application
 CMD uwsgi --ini uwsgi.ini --processes $(grep -c 'cpu[0-9]' /proc/stat)

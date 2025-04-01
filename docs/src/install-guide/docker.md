@@ -119,6 +119,24 @@ the secret for that token.
 
 `LDAP_REQUIRED_GROUP`: Ensure the user is a member of the group provided. Only checked if a group is defined otherwise no group checking is performed.
 
+### LDAP Service Account Binding
+
+MILO-ML supports LDAP servers that require authenticated connections for directory searches (no anonymous binds). In this configuration, 
+MILO-ML first binds with a service account, then searches for the user, and finally authenticates with the user's credentials.
+
+To enable service account binding, set the following environment variables:
+
+`LDAP_USE_SERVICE_ACCOUNT`: Set to `true` to enable service account binding (default is `false`)
+
+`LDAP_SERVICE_ACCOUNT_DN`: The distinguished name (DN) of the service account used for initial binding
+
+`LDAP_SERVICE_ACCOUNT_PASSWORD`: The password for the service account
+
+::: tip
+Service account binding is recommended for secure LDAP configurations where the directory server requires authenticated connections
+for searching the directory.
+:::
+
 `BROKER_URL`: URL to the RabbitMQ broker (do not use when using the all-in-one image).
 
 ### Configuring Docker Resources

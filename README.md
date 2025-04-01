@@ -74,6 +74,35 @@ will be shown (when run in via the CLI).
 and will be used to determine the generalizability of the model. This data set
 reflects the prevalence of disease being classified (eg. not balanced).
 
+## Authentication
+
+This application supports authentication via LDAP with two different binding methods:
+
+### Direct Binding (Default)
+
+The application attempts to bind directly with the user's credentials. This is the simplest
+configuration but may not work with LDAP servers that require authenticated connections
+for searching the directory.
+
+Required environment variables:
+- `LDAP_SERVER`: LDAP server address
+- `LDAP_BASE_DN`: Base DN for LDAP searches
+- `LDAP_AUTH_SECRET`: Secret key for JWT token signing
+
+Optional:
+- `LDAP_REQUIRED_GROUP`: Group membership required for authentication
+
+### Service Account Binding
+
+The application first binds with a service account before authenticating the user. This is
+required for LDAP servers that do not allow anonymous queries or require all connections
+to be authenticated.
+
+Enable this mode by setting the following additional environment variables:
+- `LDAP_USE_SERVICE_ACCOUNT`: Set to "true" to use service account binding
+- `LDAP_SERVICE_ACCOUNT_DN`: Service account distinguished name
+- `LDAP_SERVICE_ACCOUNT_PASSWORD`: Service account password
+
 ## Command Line Interface
 
 To run the program simply execute the following command:
