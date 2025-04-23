@@ -75,6 +75,11 @@ ENV LDAP_USE_SERVICE_ACCOUNT false
 ENV LDAP_SERVICE_ACCOUNT_DN ""
 ENV LDAP_SERVICE_ACCOUNT_PASSWORD ""
 
+# LDAP search configuration defaults
+ENV LDAP_LOGIN_ATTRIBUTE "sAMAccountName"
+ENV LDAP_SEARCH_SCOPE "SUBTREE"
+ENV LDAP_SEARCH_FILTER ""
+
 # start the application
 CMD uwsgi --ini uwsgi.ini --processes $(grep -c 'cpu[0-9]' /proc/stat)
 

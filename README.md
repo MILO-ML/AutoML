@@ -91,6 +91,9 @@ Required environment variables:
 
 Optional:
 - `LDAP_REQUIRED_GROUP`: Group membership required for authentication
+- `LDAP_LOGIN_ATTRIBUTE`: The LDAP attribute to use for user lookup (default `sAMAccountName`)
+- `LDAP_SEARCH_SCOPE`: The LDAP search scope – one of `BASE`, `LEVEL`, or `SUBTREE` (default `SUBTREE`)
+- `LDAP_SEARCH_FILTER`: A custom LDAP search filter; if set, it overrides the default attribute filter and group check
 
 ### Service Account Binding
 

@@ -119,6 +119,12 @@ the secret for that token.
 
 `LDAP_REQUIRED_GROUP`: Ensure the user is a member of the group provided. Only checked if a group is defined otherwise no group checking is performed.
 
+`LDAP_LOGIN_ATTRIBUTE`: The LDAP attribute to use for user lookup (default `sAMAccountName`).
+
+`LDAP_SEARCH_SCOPE`: The LDAP search scope – one of `BASE`, `LEVEL`, or `SUBTREE` (default `SUBTREE`).
+
+`LDAP_SEARCH_FILTER`: A custom LDAP search filter; if set, it overrides the default attribute filter and group check.
+
 ### LDAP Service Account Binding
 
 MILO-ML supports LDAP servers that require authenticated connections for directory searches (no anonymous binds). In this configuration, 

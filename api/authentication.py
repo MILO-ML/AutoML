@@ -11,7 +11,7 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import jwt
-from ldap3 import Server, Connection, SUBTREE, SIMPLE
+from ldap3 import Server, Connection, SUBTREE, LEVEL, BASE, SIMPLE
 from ldap3.utils.conv import escape_filter_chars
 from flask import jsonify, request, abort
 
@@ -39,10 +39,25 @@ def ldap_login():
     payload = json.loads(request.data)
     username = payload['username']
     password = payload['password']
+    # optional override of login attribute and search scope
+    login_attr = os.getenv('LDAP_LOGIN_ATTRIBUTE', 'sAMAccountName')
+    scope_name = os.getenv('LDAP_SEARCH_SCOPE', 'SUBTREE').upper()
+    scope_map = {'BASE': BASE, 'LEVEL': LEVEL, 'SUBTREE': SUBTREE}
+    search_scope = scope_map.get(scope_name, SUBTREE)
     
     # Determine username for search (remove domain if present)
     search_username = escape_filter_chars(username.split('@')[0])
-    
+    # optional custom filter: can include placeholders {login_attr}, {username}, {group}
+    custom_filter = os.getenv('LDAP_SEARCH_FILTER')
+    if custom_filter:
+        user_search_filter = custom_filter.format(
+            login_attr=login_attr,
+            username=search_username,
+            group=os.getenv('LDAP_REQUIRED_GROUP','')
+        )
+    else:
+        user_search_filter = f'({login_attr}={search_username})'
+
     # Set up the LDAP server connection
     server = Server(os.getenv('LDAP_SERVER'))
     
@@ -73,8 +88,8 @@ def ldap_login():
         # Search for the user
         connection.search(
             search_base=os.getenv('LDAP_BASE_DN'),
-            search_filter=f'(sAMAccountName={search_username})',
-            search_scope=SUBTREE,
+            search_filter=user_search_filter,
+            search_scope=search_scope,
             attributes=['objectGUID', 'givenName', 'sn', 'mail', 'memberOf', 'distinguishedName']
         )
         
@@ -105,7 +120,7 @@ def ldap_login():
         connection.search(
             search_base=os.getenv('LDAP_BASE_DN'),
             search_filter=f'(distinguishedName={user_dn})',
-            search_scope=SUBTREE,
+            search_scope=search_scope,
             attributes=['objectGUID', 'givenName', 'sn', 'mail', 'memberOf']
         )
     else:
@@ -121,15 +136,16 @@ def ldap_login():
         else:
             connection.search(
               search_base=os.getenv('LDAP_BASE_DN'),
-              search_filter=f'(sAMAccountName={search_username})',
-              search_scope=SUBTREE,
+              search_filter=user_search_filter,
+              search_scope=search_scope,
               attributes=['objectGUID', 'givenName', 'sn', 'mail', 'memberOf']
             )
 
-    # Group membership verification
-    if os.getenv('LDAP_REQUIRED_GROUP') and not any(os.getenv('LDAP_REQUIRED_GROUP') in item for item in connection.entries[0]['memberOf']):
-        connection.unbind()
-        return abort(401)
+    # Group membership verification (skip if using custom filter)
+    if not custom_filter and os.getenv('LDAP_REQUIRED_GROUP'):
+        if not any(os.getenv('LDAP_REQUIRED_GROUP') in item for item in connection.entries[0]['memberOf']):
+            connection.unbind()
+            return abort(401)
 
     token = jwt.encode(
       {
