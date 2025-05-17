@@ -117,10 +117,12 @@ def ldap_login():
             return abort(401)
             
         # Re-search to get all user attributes
+        # Retrieve user attributes using a BASE scope on the exact DN to avoid
+        # failures when LDAP_BASE_DN does not contain the user's full path
         connection.search(
-            search_base=os.getenv('LDAP_BASE_DN'),
-            search_filter=f'(distinguishedName={user_dn})',
-            search_scope=search_scope,
+            search_base=user_dn,
+            search_filter='(objectClass=*)',
+            search_scope=BASE,
             attributes=['objectGUID', 'givenName', 'sn', 'mail', 'memberOf']
         )
     else:
