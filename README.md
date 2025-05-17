@@ -86,7 +86,7 @@ for searching the directory.
 
 Required environment variables:
 - `LDAP_SERVER`: LDAP server address
-- `LDAP_BASE_DN`: Base DN for LDAP searches
+- `LDAP_BASE_DN`: Base DN for LDAP searches. This should reference the part of the directory tree where user accounts are stored (e.g. `DC=example,DC=com`). Providing a group-specific OU will prevent user objects from being located.
 - `LDAP_AUTH_SECRET`: Secret key for JWT token signing
 
 Optional:

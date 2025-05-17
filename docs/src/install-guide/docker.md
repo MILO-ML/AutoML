@@ -112,7 +112,7 @@ available for configuration in such an environment:
 
 `LDAP_SERVER`: The complete path to the LDAP server including the protocol (`ldap` or `ldaps`) and port number.
 
-`LDAP_BASE_DN`: Defines the base distinguished name used to search for users.
+`LDAP_BASE_DN`: Defines the base distinguished name used to search for users. This should be the DN where user objects reside (for example `DC=example,DC=com`). Using a group OU will prevent users from being found.
 
 `LDAP_AUTH_SECRET`: After successfully authenticating using LDAP, sessions are authenticated using a signed JWT token and this defines
 the secret for that token.
