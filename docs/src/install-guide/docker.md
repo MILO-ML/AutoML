@@ -112,12 +112,36 @@ available for configuration in such an environment:
 
 `LDAP_SERVER`: The complete path to the LDAP server including the protocol (`ldap` or `ldaps`) and port number.
 
-`LDAP_BASE_DN`: Defines the base distinguished name used to search for users.
+`LDAP_BASE_DN`: Defines the base distinguished name used to search for users. This should be the DN where user objects reside (for example `DC=example,DC=com`). Using a group OU will prevent users from being found.
 
 `LDAP_AUTH_SECRET`: After successfully authenticating using LDAP, sessions are authenticated using a signed JWT token and this defines
 the secret for that token.
 
 `LDAP_REQUIRED_GROUP`: Ensure the user is a member of the group provided. Only checked if a group is defined otherwise no group checking is performed.
+
+`LDAP_LOGIN_ATTRIBUTE`: The LDAP attribute to use for user lookup (default `sAMAccountName`).
+
+`LDAP_SEARCH_SCOPE`: The LDAP search scope – one of `BASE`, `LEVEL`, or `SUBTREE` (default `SUBTREE`).
+
+`LDAP_SEARCH_FILTER`: A custom LDAP search filter; if set, it overrides the default attribute filter and group check.
+
+### LDAP Service Account Binding
+
+MILO-ML supports LDAP servers that require authenticated connections for directory searches (no anonymous binds). In this configuration, 
+MILO-ML first binds with a service account, then searches for the user, and finally authenticates with the user's credentials.
+
+To enable service account binding, set the following environment variables:
+
+`LDAP_USE_SERVICE_ACCOUNT`: Set to `true` to enable service account binding (default is `false`)
+
+`LDAP_SERVICE_ACCOUNT_DN`: The distinguished name (DN) of the service account used for initial binding
+
+`LDAP_SERVICE_ACCOUNT_PASSWORD`: The password for the service account
+
+::: tip
+Service account binding is recommended for secure LDAP configurations where the directory server requires authenticated connections
+for searching the directory.
+:::
 
 `BROKER_URL`: URL to the RabbitMQ broker (do not use when using the all-in-one image).
 
